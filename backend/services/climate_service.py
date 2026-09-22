@@ -3,9 +3,9 @@ import sqlite3
 from functools import lru_cache
 
 
-# ---------------------------------------------------------
+# ============================================================
 # PATHS
-# ---------------------------------------------------------
+# ============================================================
 
 BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))
@@ -23,75 +23,39 @@ DB_PATH = os.path.join(
     "smart_tourism.db"
 )
 
+ONNX_MODEL_PATH = os.path.join(
+    MODEL_DIR,
+    "best_climate_lstm_model.onnx"
+)
 
-# ---------------------------------------------------------
+METADATA_PATH = os.path.join(
+    MODEL_DIR,
+    "best_climate_metadata.pkl"
+)
+
+
+# ============================================================
 # LAZY CLIMATE RESOURCE LOADER
-# ---------------------------------------------------------
+# ============================================================
 
 @lru_cache(maxsize=1)
 def _get_climate_resources():
+
     import joblib
     import pandas as pd
-    import torch
-    from torch import nn
+    import onnxruntime as ort
 
-    # -----------------------------------------------------
-    # MODEL CLASS
-    # -----------------------------------------------------
-
-    class ClimateLSTM(nn.Module):
-        def __init__(
-            self,
-            input_size,
-            hidden_size=24,
-            num_layers=1,
-            output_size=None,
-            dropout=0.2,
-        ):
-            super().__init__()
-
-            if output_size is None:
-                output_size = input_size
-
-            self.lstm = nn.LSTM(
-                input_size,
-                hidden_size,
-                num_layers,
-                batch_first=True,
-            )
-
-            self.dropout = nn.Dropout(dropout)
-
-            self.fc = nn.Linear(
-                hidden_size,
-                output_size,
-            )
-
-        def forward(self, x):
-            out, _ = self.lstm(x)
-
-            out = self.dropout(
-                out[:, -1, :]
-            )
-
-            out = self.fc(out)
-
-            return out
-
-    # -----------------------------------------------------
-    # METADATA
-    # -----------------------------------------------------
-
-    metadata_path = os.path.join(
-        MODEL_DIR,
-        "best_climate_metadata.pkl",
-    )
+    # --------------------------------------------------------
+    # LOAD METADATA
+    # --------------------------------------------------------
 
     climate_meta = joblib.load(
-        metadata_path
+        METADATA_PATH
     )
 
-    seq_len = climate_meta["seq_len"]
+    seq_len = int(
+        climate_meta["seq_len"]
+    )
 
     last_known_date = pd.Timestamp(
         climate_meta["last_known_date"]
@@ -101,52 +65,66 @@ def _get_climate_resources():
         "target_cols"
     ]
 
-    # -----------------------------------------------------
-    # TRAINED MODEL
-    # -----------------------------------------------------
+    # --------------------------------------------------------
+    # LOAD ONNX MODEL
+    # --------------------------------------------------------
 
-    climate_model = ClimateLSTM(
-        input_size=len(target_cols),
-        hidden_size=24,
-        num_layers=1,
-        output_size=len(target_cols),
-        dropout=0.2,
+    session_options = (
+        ort.SessionOptions()
     )
 
-    model_path = os.path.join(
-        MODEL_DIR,
-        "best_climate_lstm_model.pt",
+    # Keep memory/thread usage conservative for Render Free.
+    session_options.intra_op_num_threads = 1
+    session_options.inter_op_num_threads = 1
+
+    climate_session = (
+        ort.InferenceSession(
+            ONNX_MODEL_PATH,
+            sess_options=session_options,
+            providers=[
+                "CPUExecutionProvider"
+            ],
+        )
     )
 
-    state_dict = torch.load(
-        model_path,
-        map_location="cpu",
-        weights_only=True,
+    input_name = (
+        climate_session
+        .get_inputs()[0]
+        .name
     )
 
-    climate_model.load_state_dict(
-        state_dict
+    output_name = (
+        climate_session
+        .get_outputs()[0]
+        .name
     )
 
-    climate_model.eval()
+    # --------------------------------------------------------
+    # LOAD HISTORICAL CLIMATE DATA
+    # --------------------------------------------------------
 
-    # -----------------------------------------------------
-    # HISTORICAL CLIMATE DATA
-    # -----------------------------------------------------
-
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(
+        DB_PATH
+    )
 
     try:
+
         raw = pd.read_sql(
             "SELECT * FROM climate_dataset",
             conn,
         )
+
     finally:
+
         conn.close()
 
     raw["Date"] = pd.to_datetime(
         raw["Date"]
     )
+
+    # --------------------------------------------------------
+    # RAINFALL PERCENT
+    # --------------------------------------------------------
 
     raw["Is_Rain_Day"] = (
         raw["Rainfall_mm"] >= 1.0
@@ -165,19 +143,37 @@ def _get_climate_resources():
         )
     )
 
+    # --------------------------------------------------------
+    # STATEWIDE DAILY VALUES
+    # --------------------------------------------------------
+
     statewide = (
-        raw.groupby("Date")[target_cols]
+        raw.groupby(
+            "Date"
+        )[target_cols]
         .mean()
         .asfreq("D")
     )
 
     climate_diffed = (
-        statewide.diff().dropna()
+        statewide
+        .diff()
+        .dropna()
     )
 
-    district_daily = raw.groupby(
-        ["District", "Date"]
-    )[target_cols].mean()
+    # --------------------------------------------------------
+    # DISTRICT BASELINE
+    # --------------------------------------------------------
+
+    district_daily = (
+        raw.groupby(
+            [
+                "District",
+                "Date",
+            ]
+        )[target_cols]
+        .mean()
+    )
 
     climate_district_baseline = (
         district_daily.xs(
@@ -186,46 +182,103 @@ def _get_climate_resources():
         )
     )
 
-    return (
-        climate_model,
-        seq_len,
-        last_known_date,
-        target_cols,
-        climate_diffed,
-        climate_district_baseline,
-    )
+    return {
+        "session":
+            climate_session,
+
+        "input_name":
+            input_name,
+
+        "output_name":
+            output_name,
+
+        "seq_len":
+            seq_len,
+
+        "last_known_date":
+            last_known_date,
+
+        "target_cols":
+            target_cols,
+
+        "climate_diffed":
+            climate_diffed,
+
+        "district_baseline":
+            climate_district_baseline,
+    }
 
 
-# ---------------------------------------------------------
+# ============================================================
 # PREDICTION
-# ---------------------------------------------------------
+# ============================================================
 
 def predict_climate(data: dict):
+
     import numpy as np
     import pandas as pd
-    import torch
 
-    (
-        climate_model,
-        seq_len,
-        last_known_date,
-        target_cols,
-        climate_diffed,
-        climate_district_baseline,
-    ) = _get_climate_resources()
+    resources = (
+        _get_climate_resources()
+    )
+
+    climate_session = resources[
+        "session"
+    ]
+
+    input_name = resources[
+        "input_name"
+    ]
+
+    output_name = resources[
+        "output_name"
+    ]
+
+    seq_len = resources[
+        "seq_len"
+    ]
+
+    last_known_date = resources[
+        "last_known_date"
+    ]
+
+    target_cols = resources[
+        "target_cols"
+    ]
+
+    climate_diffed = resources[
+        "climate_diffed"
+    ]
+
+    climate_district_baseline = (
+        resources[
+            "district_baseline"
+        ]
+    )
+
+    # --------------------------------------------------------
+    # REQUEST
+    # --------------------------------------------------------
 
     forecast_date = pd.Timestamp(
         data["forecast_date"]
     )
 
-    district = data["district"]
+    district = data[
+        "district"
+    ]
 
     days_ahead = (
         forecast_date -
         last_known_date
     ).days
 
+    # --------------------------------------------------------
+    # VALIDATION
+    # --------------------------------------------------------
+
     if days_ahead < 1:
+
         return {
             "error":
                 f"forecast_date must be strictly after "
@@ -235,91 +288,152 @@ def predict_climate(data: dict):
     if district not in (
         climate_district_baseline.index
     ):
+
         return {
             "error":
                 f"'{district}' not found in climate data"
         }
 
-    current_seq = torch.tensor(
-        climate_diffed.values[
-            -seq_len:
-        ],
-        dtype=torch.float32,
-    ).unsqueeze(0)
+    # --------------------------------------------------------
+    # INITIAL SEQUENCE
+    #
+    # Shape:
+    # (1, sequence_length, features)
+    # --------------------------------------------------------
 
-    baseline = (
-        climate_district_baseline.loc[
-            district
-        ]
+    current_seq = (
+        climate_diffed
+        .values[-seq_len:]
+        .astype(np.float32)
     )
 
-    future_diffs = []
+    current_seq = np.expand_dims(
+        current_seq,
+        axis=0,
+    )
+
+    baseline = (
+        climate_district_baseline
+        .loc[district]
+    )
+
+    baseline_values = (
+        baseline
+        .values
+        .astype(np.float32)
+    )
+
+    # --------------------------------------------------------
+    # RECURSIVE FORECAST
+    # --------------------------------------------------------
+
+    cumulative_diff = np.zeros(
+        len(target_cols),
+        dtype=np.float32,
+    )
+
     daily_forecast = []
 
-    with torch.no_grad():
+    for i in range(
+        days_ahead
+    ):
 
-        for i in range(days_ahead):
+        # ----------------------------------------------
+        # ONNX inference
+        # ----------------------------------------------
 
-            next_diff = climate_model(
-                current_seq
-            )
-
-            future_diffs.append(
-                next_diff
-                .squeeze(0)
-                .numpy()
-            )
-
-            current_seq = torch.cat(
-                [
-                    current_seq[
-                        :, 1:, :
-                    ],
-                    next_diff.unsqueeze(1),
-                ],
-                dim=1,
-            )
-
-            cumulative_so_far = np.sum(
-                future_diffs,
-                axis=0,
-            )
-
-            day_values = (
-                baseline +
-                cumulative_so_far
-            )
-
-            day_date = (
-                last_known_date +
-                pd.Timedelta(
-                    days=i + 1
-                )
-            )
-
-            daily_forecast.append(
+        next_diff = (
+            climate_session.run(
+                [output_name],
                 {
-                    "forecast_date":
-                        day_date.strftime(
-                            "%Y-%m-%d"
-                        ),
+                    input_name:
+                        current_seq
+                },
+            )[0]
+        )
 
-                    **dict(
-                        zip(
-                            target_cols,
-                            day_values.tolist(),
-                        )
-                    ),
-                }
+        # Expected output:
+        # (1, number_of_features)
+
+        next_diff = (
+            next_diff[0]
+            .astype(np.float32)
+        )
+
+        # ----------------------------------------------
+        # Update sequence
+        # ----------------------------------------------
+
+        next_step = np.expand_dims(
+            next_diff,
+            axis=(0, 1),
+        )
+
+        current_seq = np.concatenate(
+            [
+                current_seq[
+                    :, 1:, :
+                ],
+
+                next_step,
+            ],
+            axis=1,
+        )
+
+        # ----------------------------------------------
+        # Reconstruct actual climate values
+        # ----------------------------------------------
+
+        cumulative_diff += (
+            next_diff
+        )
+
+        day_values = (
+            baseline_values +
+            cumulative_diff
+        )
+
+        day_date = (
+            last_known_date +
+            pd.Timedelta(
+                days=i + 1
+            )
+        )
+
+        row = {
+            "forecast_date":
+                day_date.strftime(
+                    "%Y-%m-%d"
+                )
+        }
+
+        for column, value in zip(
+            target_cols,
+            day_values,
+        ):
+
+            row[str(column)] = float(
+                value
             )
 
-    final_day = daily_forecast[-1]
+        daily_forecast.append(
+            row
+        )
+
+    # --------------------------------------------------------
+    # FINAL RESULT
+    # --------------------------------------------------------
+
+    final_day = (
+        daily_forecast[-1]
+    )
 
     return {
         **{
-            k: v
-            for k, v in final_day.items()
-            if k != "forecast_date"
+            key: value
+            for key, value
+            in final_day.items()
+            if key != "forecast_date"
         },
 
         "daily_forecast":
