@@ -1,74 +1,12 @@
-from pathlib import Path
-from functools import lru_cache
-
 from services.review_service import classify_review
 from services.budget_service import predict_budget
 from services.climate_service import predict_climate
 from services.crowd_service import predict_crowd
 from services.transport_service import predict_transport
 
-
-# ============================================================
-# PATHS
-# ============================================================
-
-BACKEND_DIR = Path(
-    __file__
-).resolve().parent.parent
-
-PROJECT_DIR = BACKEND_DIR.parent
-
-RAG_DIR = (
-    PROJECT_DIR /
-    "ai" /
-    "rag"
+from services.rag_service import (
+    retrieve_documents
 )
-
-INDEX_PATH = (
-    RAG_DIR /
-    "vector_store" /
-    "destination.index"
-)
-
-METADATA_PATH = (
-    RAG_DIR /
-    "vector_store" /
-    "metadata.csv"
-)
-
-
-# ============================================================
-# LAZY RAG COMPONENTS
-# ============================================================
-
-@lru_cache(maxsize=1)
-def _get_rag_resources():
-
-    import faiss
-    import pandas as pd
-
-    from sentence_transformers import (
-        SentenceTransformer
-    )
-
-    rag_index = faiss.read_index(
-        str(INDEX_PATH)
-    )
-
-    rag_metadata = pd.read_csv(
-        METADATA_PATH
-    )
-
-    embedding_model = SentenceTransformer(
-        "sentence-transformers/"
-        "all-MiniLM-L6-v2"
-    )
-
-    return (
-        rag_index,
-        rag_metadata,
-        embedding_model
-    )
 
 
 # ============================================================
@@ -80,71 +18,17 @@ def search_destination_knowledge(
     top_k: int = 10
 ):
 
-    (
-        rag_index,
-        rag_metadata,
-        embedding_model
-    ) = _get_rag_resources()
-
-    query_embedding = embedding_model.encode(
-        [query],
-        convert_to_numpy=True,
-        normalize_embeddings=True
-    ).astype("float32")
-
-    search_count = min(
-        top_k,
-        rag_index.ntotal
+    results = retrieve_documents(
+        question=query,
+        top_k=top_k,
     )
-
-    scores, indices = rag_index.search(
-        query_embedding,
-        search_count
-    )
-
-    results = []
-
-    for score, idx in zip(
-        scores[0],
-        indices[0]
-    ):
-
-        if idx == -1:
-            continue
-
-        row = rag_metadata.iloc[idx]
-
-        results.append({
-            "document_id": str(
-                row["document_id"]
-            ),
-
-            "spot_name": str(
-                row["spot_name"]
-            ),
-
-            "district": str(
-                row["district"]
-            ),
-
-            "category": str(
-                row["category"]
-            ),
-
-            "knowledge_type": str(
-                row["knowledge_type"]
-            ),
-
-            "content": str(
-                row["content"]
-            ),
-
-            "similarity": float(score)
-        })
 
     return {
-        "query": query,
-        "sources": results
+        "query":
+            query,
+
+        "sources":
+            results,
     }
 
 
@@ -175,20 +59,38 @@ def run_budget_prediction(
 ):
 
     data = {
-        "duration_days": duration_days,
-        "num_travelers": num_travelers,
-        "route_distance_km": route_distance_km,
-        "accommodation_tier": accommodation_tier,
-        "transport_mode": transport_mode,
-        "season": season
+        "duration_days":
+            duration_days,
+
+        "num_travelers":
+            num_travelers,
+
+        "route_distance_km":
+            route_distance_km,
+
+        "accommodation_tier":
+            accommodation_tier,
+
+        "transport_mode":
+            transport_mode,
+
+        "season":
+            season
     }
 
-    result = predict_budget(data)
+    result = predict_budget(
+        data
+    )
 
-    if not isinstance(result, dict):
+    if not isinstance(
+        result,
+        dict
+    ):
         return result
 
-    if result.get("error"):
+    if result.get(
+        "error"
+    ):
         return result
 
     # --------------------------------------------------------
@@ -203,11 +105,15 @@ def run_budget_prediction(
         "tolls_and_parking_est"
     ]
 
-    cleaned = dict(result)
+    cleaned = dict(
+        result
+    )
 
     for field in cost_fields:
 
-        value = cleaned.get(field)
+        value = cleaned.get(
+            field
+        )
 
         if isinstance(
             value,
@@ -228,7 +134,9 @@ def run_budget_prediction(
         )
     ]
 
-    if len(available_costs) == len(
+    if len(
+        available_costs
+    ) == len(
         cost_fields
     ):
 
@@ -251,11 +159,16 @@ def run_climate_prediction(
 ):
 
     data = {
-        "district": district,
-        "forecast_date": forecast_date
+        "district":
+            district,
+
+        "forecast_date":
+            forecast_date
     }
 
-    return predict_climate(data)
+    return predict_climate(
+        data
+    )
 
 
 # ============================================================
@@ -273,16 +186,31 @@ def run_crowd_prediction(
 ):
 
     data = {
-        "spot_name": spot_name,
-        "district": district,
-        "category": category,
-        "year": year,
-        "month": month,
-        "season": season,
-        "festival": festival
+        "spot_name":
+            spot_name,
+
+        "district":
+            district,
+
+        "category":
+            category,
+
+        "year":
+            year,
+
+        "month":
+            month,
+
+        "season":
+            season,
+
+        "festival":
+            festival
     }
 
-    return predict_crowd(data)
+    return predict_crowd(
+        data
+    )
 
 
 # ============================================================
@@ -298,11 +226,22 @@ def run_transport_prediction(
 ):
 
     data = {
-        "distance_km": distance_km,
-        "budget_limit": budget_limit,
-        "num_people": num_people,
-        "rainfall_mm": rainfall_mm,
-        "road_access_rating": road_access_rating
+        "distance_km":
+            distance_km,
+
+        "budget_limit":
+            budget_limit,
+
+        "num_people":
+            num_people,
+
+        "rainfall_mm":
+            rainfall_mm,
+
+        "road_access_rating":
+            road_access_rating
     }
 
-    return predict_transport(data)
+    return predict_transport(
+        data
+    )

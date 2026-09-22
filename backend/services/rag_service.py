@@ -3,9 +3,9 @@ from functools import lru_cache
 import os
 
 
-# ==================================================
+# ============================================================
 # PATHS
-# ==================================================
+# ============================================================
 
 BACKEND_DIR = Path(
     __file__
@@ -14,30 +14,42 @@ BACKEND_DIR = Path(
 PROJECT_DIR = BACKEND_DIR.parent
 
 RAG_DIR = (
-    PROJECT_DIR /
-    "ai" /
-    "rag"
+    PROJECT_DIR
+    / "ai"
+    / "rag"
 )
 
 INDEX_PATH = (
-    RAG_DIR /
-    "vector_store" /
-    "destination.index"
+    RAG_DIR
+    / "vector_store"
+    / "destination.index"
 )
 
 METADATA_PATH = (
-    RAG_DIR /
-    "vector_store" /
-    "metadata.csv"
+    RAG_DIR
+    / "vector_store"
+    / "metadata.csv"
+)
+
+EMBEDDING_MODEL_DIR = (
+    BACKEND_DIR
+    / "models"
+    / "rag_embedding"
+)
+
+ONNX_MODEL_PATH = (
+    EMBEDDING_MODEL_DIR
+    / "model.onnx"
 )
 
 
-# ==================================================
+# ============================================================
 # LAZY GEMINI CLIENT
-# ==================================================
+# ============================================================
 
 @lru_cache(maxsize=1)
 def _get_gemini_client():
+
     from dotenv import load_dotenv
     from google import genai
 
@@ -50,6 +62,7 @@ def _get_gemini_client():
     )
 
     if not api_key:
+
         raise ValueError(
             "GEMINI_API_KEY not found"
         )
@@ -59,68 +72,269 @@ def _get_gemini_client():
     )
 
 
-# ==================================================
-# LAZY RAG COMPONENTS
-# ==================================================
+# ============================================================
+# LAZY RAG RESOURCES
+# ============================================================
 
 @lru_cache(maxsize=1)
 def _get_rag_resources():
+
     import faiss
     import pandas as pd
+    import onnxruntime as ort
 
-    from sentence_transformers import (
-        SentenceTransformer,
+    from transformers import (
+        AutoTokenizer
     )
+
+    # --------------------------------------------------------
+    # FAISS
+    # --------------------------------------------------------
 
     index = faiss.read_index(
         str(INDEX_PATH)
     )
 
+    # --------------------------------------------------------
+    # METADATA
+    # --------------------------------------------------------
+
     metadata = pd.read_csv(
         METADATA_PATH
     )
 
-    embedding_model = SentenceTransformer(
-        "sentence-transformers/"
-        "all-MiniLM-L6-v2"
+    # --------------------------------------------------------
+    # LOCAL TOKENIZER
+    #
+    # No Hugging Face download occurs on Render.
+    # --------------------------------------------------------
+
+    tokenizer = (
+        AutoTokenizer.from_pretrained(
+            EMBEDDING_MODEL_DIR,
+            local_files_only=True,
+        )
+    )
+
+    # --------------------------------------------------------
+    # ONNX SESSION
+    # --------------------------------------------------------
+
+    session_options = (
+        ort.SessionOptions()
+    )
+
+    # Conservative settings for Render Free.
+    session_options.intra_op_num_threads = 1
+    session_options.inter_op_num_threads = 1
+
+    embedding_session = (
+        ort.InferenceSession(
+            str(ONNX_MODEL_PATH),
+            sess_options=session_options,
+            providers=[
+                "CPUExecutionProvider"
+            ],
+        )
     )
 
     return (
         index,
         metadata,
-        embedding_model,
+        tokenizer,
+        embedding_session,
     )
 
 
-# ==================================================
+# ============================================================
+# MEAN POOLING
+# ============================================================
+
+def _mean_pooling(
+    token_embeddings,
+    attention_mask,
+):
+
+    import numpy as np
+
+    mask = np.expand_dims(
+        attention_mask,
+        axis=-1,
+    ).astype(
+        np.float32
+    )
+
+    summed = np.sum(
+        token_embeddings * mask,
+        axis=1,
+    )
+
+    counts = np.sum(
+        mask,
+        axis=1,
+    )
+
+    counts = np.clip(
+        counts,
+        a_min=1e-9,
+        a_max=None,
+    )
+
+    return (
+        summed / counts
+    )
+
+
+# ============================================================
+# L2 NORMALIZATION
+# ============================================================
+
+def _normalize_embeddings(
+    embeddings,
+):
+
+    import numpy as np
+
+    norms = np.linalg.norm(
+        embeddings,
+        axis=1,
+        keepdims=True,
+    )
+
+    norms = np.clip(
+        norms,
+        a_min=1e-12,
+        a_max=None,
+    )
+
+    return (
+        embeddings / norms
+    )
+
+
+# ============================================================
+# LIGHTWEIGHT ONNX EMBEDDING
+# ============================================================
+
+def create_query_embedding(
+    text: str,
+):
+
+    import numpy as np
+
+    (
+        _,
+        _,
+        tokenizer,
+        embedding_session,
+    ) = _get_rag_resources()
+
+    encoded = tokenizer(
+        text,
+        return_tensors="np",
+        padding=True,
+        truncation=True,
+        max_length=256,
+    )
+
+    input_ids = (
+        encoded[
+            "input_ids"
+        ]
+        .astype(np.int64)
+    )
+
+    attention_mask = (
+        encoded[
+            "attention_mask"
+        ]
+        .astype(np.int64)
+    )
+
+    if "token_type_ids" in encoded:
+
+        token_type_ids = (
+            encoded[
+                "token_type_ids"
+            ]
+            .astype(np.int64)
+        )
+
+    else:
+
+        token_type_ids = (
+            np.zeros_like(
+                input_ids,
+                dtype=np.int64,
+            )
+        )
+
+    token_embeddings = (
+        embedding_session.run(
+            [
+                "last_hidden_state"
+            ],
+            {
+                "input_ids":
+                    input_ids,
+
+                "attention_mask":
+                    attention_mask,
+
+                "token_type_ids":
+                    token_type_ids,
+            },
+        )[0]
+    )
+
+    embeddings = _mean_pooling(
+        token_embeddings,
+        attention_mask,
+    )
+
+    embeddings = (
+        _normalize_embeddings(
+            embeddings
+        )
+    )
+
+    return embeddings.astype(
+        np.float32
+    )
+
+
+# ============================================================
 # RETRIEVAL
-# ==================================================
+# ============================================================
 
 def retrieve_documents(
     question: str,
     top_k: int = 3,
 ):
+
     (
         index,
         metadata,
-        embedding_model,
+        _,
+        _,
     ) = _get_rag_resources()
 
     query_embedding = (
-        embedding_model.encode(
-            [question],
-            convert_to_numpy=True,
-            normalize_embeddings=True,
+        create_query_embedding(
+            question
         )
-        .astype("float32")
     )
 
-    scores, indices = index.search(
-        query_embedding,
-        min(
-            top_k,
-            index.ntotal,
-        ),
+    search_count = min(
+        top_k,
+        index.ntotal,
+    )
+
+    scores, indices = (
+        index.search(
+            query_embedding,
+            search_count,
+        )
     )
 
     results = []
@@ -129,62 +343,83 @@ def retrieve_documents(
         scores[0],
         indices[0],
     ):
+
         if idx == -1:
             continue
 
-        row = metadata.iloc[idx]
+        row = metadata.iloc[
+            idx
+        ]
 
         results.append(
             {
                 "document_id":
                     str(
-                        row["document_id"]
+                        row[
+                            "document_id"
+                        ]
                     ),
 
                 "spot_name":
                     str(
-                        row["spot_name"]
+                        row[
+                            "spot_name"
+                        ]
                     ),
 
                 "district":
                     str(
-                        row["district"]
+                        row[
+                            "district"
+                        ]
                     ),
 
                 "category":
                     str(
-                        row["category"]
+                        row[
+                            "category"
+                        ]
                     ),
 
                 "knowledge_type":
                     str(
-                        row["knowledge_type"]
+                        row[
+                            "knowledge_type"
+                        ]
                     ),
 
                 "content":
                     str(
-                        row["content"]
+                        row[
+                            "content"
+                        ]
                     ),
 
                 "similarity":
-                    float(score),
+                    float(
+                        score
+                    ),
             }
         )
 
     return results
 
 
-# ==================================================
+# ============================================================
 # CONTEXT
-# ==================================================
+# ============================================================
 
-def build_context(results):
+def build_context(
+    results
+):
+
     sections = []
 
     for number, result in enumerate(
         results,
         start=1,
     ):
+
         sections.append(
             f"""
 Source {number}
@@ -200,14 +435,15 @@ Information: {result['content']}
     )
 
 
-# ==================================================
+# ============================================================
 # RAG
-# ==================================================
+# ============================================================
 
 def answer_question(
     question: str,
     top_k: int = 3,
 ):
+
     results = retrieve_documents(
         question=question,
         top_k=top_k,
@@ -215,10 +451,14 @@ def answer_question(
 
     if (
         not results
-        or results[0]["similarity"] < 0.25
+        or results[0][
+            "similarity"
+        ] < 0.25
     ):
+
         return {
-            "question": question,
+            "question":
+                question,
 
             "answer": (
                 "I don't have enough relevant "
@@ -227,7 +467,8 @@ def answer_question(
                 "reliably."
             ),
 
-            "sources": results,
+            "sources":
+                results,
         }
 
     context = build_context(
@@ -261,26 +502,50 @@ USER QUESTION:
 GROUNDED ANSWER:
 """
 
-    client = _get_gemini_client()
+    try:
 
-    interaction = (
-        client.interactions.create(
-            model="gemini-3.6-flash",
-            input=prompt,
+        client = (
+            _get_gemini_client()
         )
-    )
 
-    answer = interaction.output_text
+        interaction = (
+            client.interactions.create(
+                model="gemini-3.6-flash",
+                input=prompt,
+            )
+        )
 
-    if not answer:
         answer = (
-            "The relevant information was "
-            "retrieved, but an answer could "
-            "not be generated."
+            interaction.output_text
+        )
+
+        if not answer:
+
+            answer = (
+                "The relevant information was "
+                "retrieved, but an answer could "
+                "not be generated."
+            )
+
+    except Exception as exc:
+
+        # Retrieval remains useful even if Gemini
+        # quota/network/authentication is unavailable.
+
+        answer = (
+            "Relevant information was retrieved "
+            "from the Around You knowledge base, "
+            "but the generated answer is currently "
+            "unavailable."
         )
 
     return {
-        "question": question,
-        "answer": answer.strip(),
-        "sources": results,
+        "question":
+            question,
+
+        "answer":
+            answer.strip(),
+
+        "sources":
+            results,
     }
