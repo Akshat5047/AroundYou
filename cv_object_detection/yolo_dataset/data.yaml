@@ -1,0 +1,8 @@
+
+path: D:\Data Science - SP\Internships\Deep Learning-NLP-GenAI\AroundYou\cv_object_detection\yolo_dataset
+train: train/images
+val: val/images
+test: test/images
+
+names:
+  0: litter
