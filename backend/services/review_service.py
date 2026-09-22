@@ -1,6 +1,10 @@
 import os
-import joblib
+from functools import lru_cache
 
+
+# ============================================================
+# PATHS
+# ============================================================
 
 BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))
@@ -13,25 +17,45 @@ MODEL_DIR = os.path.join(
 )
 
 
-model = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "review_trust_model.pkl"
-    )
-)
-
-vectorizer = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "tfidf_vectorizer.pkl"
-    )
-)
-
+# ============================================================
+# SETTINGS
+# ============================================================
 
 CONFIDENCE_THRESHOLD = 0.70
 
 
+# ============================================================
+# LAZY MODEL LOADER
+# ============================================================
+
+@lru_cache(maxsize=1)
+def _get_review_resources():
+    import joblib
+
+    model = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "review_trust_model.pkl"
+        )
+    )
+
+    vectorizer = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "tfidf_vectorizer.pkl"
+        )
+    )
+
+    return model, vectorizer
+
+
+# ============================================================
+# CLASSIFICATION
+# ============================================================
+
 def classify_review(review: str):
+
+    model, vectorizer = _get_review_resources()
 
     # Convert text to TF-IDF features
     X = vectorizer.transform([review])

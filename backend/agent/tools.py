@@ -1,8 +1,5 @@
 from pathlib import Path
-
-import faiss
-import pandas as pd
-from sentence_transformers import SentenceTransformer
+from functools import lru_cache
 
 from services.review_service import classify_review
 from services.budget_service import predict_budget
@@ -15,29 +12,63 @@ from services.transport_service import predict_transport
 # PATHS
 # ============================================================
 
-BACKEND_DIR = Path(__file__).resolve().parent.parent
+BACKEND_DIR = Path(
+    __file__
+).resolve().parent.parent
+
 PROJECT_DIR = BACKEND_DIR.parent
-RAG_DIR = PROJECT_DIR / "ai" / "rag"
 
-INDEX_PATH = RAG_DIR / "vector_store" / "destination.index"
-METADATA_PATH = RAG_DIR / "vector_store" / "metadata.csv"
+RAG_DIR = (
+    PROJECT_DIR /
+    "ai" /
+    "rag"
+)
+
+INDEX_PATH = (
+    RAG_DIR /
+    "vector_store" /
+    "destination.index"
+)
+
+METADATA_PATH = (
+    RAG_DIR /
+    "vector_store" /
+    "metadata.csv"
+)
 
 
 # ============================================================
-# LOAD RAG COMPONENTS ONCE
+# LAZY RAG COMPONENTS
 # ============================================================
 
-rag_index = faiss.read_index(
-    str(INDEX_PATH)
-)
+@lru_cache(maxsize=1)
+def _get_rag_resources():
 
-rag_metadata = pd.read_csv(
-    METADATA_PATH
-)
+    import faiss
+    import pandas as pd
 
-embedding_model = SentenceTransformer(
-    "sentence-transformers/all-MiniLM-L6-v2"
-)
+    from sentence_transformers import (
+        SentenceTransformer
+    )
+
+    rag_index = faiss.read_index(
+        str(INDEX_PATH)
+    )
+
+    rag_metadata = pd.read_csv(
+        METADATA_PATH
+    )
+
+    embedding_model = SentenceTransformer(
+        "sentence-transformers/"
+        "all-MiniLM-L6-v2"
+    )
+
+    return (
+        rag_index,
+        rag_metadata,
+        embedding_model
+    )
 
 
 # ============================================================
@@ -48,6 +79,12 @@ def search_destination_knowledge(
     query: str,
     top_k: int = 10
 ):
+
+    (
+        rag_index,
+        rag_metadata,
+        embedding_model
+    ) = _get_rag_resources()
 
     query_embedding = embedding_model.encode(
         [query],
@@ -81,21 +118,27 @@ def search_destination_knowledge(
             "document_id": str(
                 row["document_id"]
             ),
+
             "spot_name": str(
                 row["spot_name"]
             ),
+
             "district": str(
                 row["district"]
             ),
+
             "category": str(
                 row["category"]
             ),
+
             "knowledge_type": str(
                 row["knowledge_type"]
             ),
+
             "content": str(
                 row["content"]
             ),
+
             "similarity": float(score)
         })
 
@@ -150,10 +193,6 @@ def run_budget_prediction(
 
     # --------------------------------------------------------
     # COST CLEANUP
-    #
-    # Regression models can occasionally predict a tiny
-    # negative value for a non-negative cost component.
-    # Clamp such values to zero before presenting them.
     # --------------------------------------------------------
 
     cost_fields = [
@@ -170,14 +209,15 @@ def run_budget_prediction(
 
         value = cleaned.get(field)
 
-        if isinstance(value, (int, float)):
+        if isinstance(
+            value,
+            (int, float)
+        ):
 
             cleaned[field] = max(
                 0.0,
                 float(value)
             )
-
-    # Recalculate total from cleaned components.
 
     available_costs = [
         cleaned[field]
@@ -188,9 +228,13 @@ def run_budget_prediction(
         )
     ]
 
-    if len(available_costs) == len(cost_fields):
+    if len(available_costs) == len(
+        cost_fields
+    ):
 
-        cleaned["predicted_total_cost"] = sum(
+        cleaned[
+            "predicted_total_cost"
+        ] = sum(
             available_costs
         )
 

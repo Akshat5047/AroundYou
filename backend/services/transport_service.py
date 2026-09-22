@@ -1,7 +1,5 @@
 import os
-
-import joblib
-import pandas as pd
+from functools import lru_cache
 
 
 # ---------------------------------------------------------
@@ -33,29 +31,39 @@ TRANSPORT_FEATURE_COLS = [
 
 
 # ---------------------------------------------------------
-# LOAD ARTIFACTS
+# LAZY LOAD ARTIFACTS
 # ---------------------------------------------------------
 
-transport_model = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "transport_mode_model.pkl"
-    )
-)
+@lru_cache(maxsize=1)
+def _get_transport_resources():
+    import joblib
 
-transport_scaler = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "transport_mode_scaler.pkl"
+    transport_model = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "transport_mode_model.pkl"
+        )
     )
-)
 
-transport_label_encoder = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "transport_mode_label_encoder.pkl"
+    transport_scaler = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "transport_mode_scaler.pkl"
+        )
     )
-)
+
+    transport_label_encoder = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "transport_mode_label_encoder.pkl"
+        )
+    )
+
+    return (
+        transport_model,
+        transport_scaler,
+        transport_label_encoder,
+    )
 
 
 # ---------------------------------------------------------
@@ -63,13 +71,28 @@ transport_label_encoder = joblib.load(
 # ---------------------------------------------------------
 
 def predict_transport(data: dict):
+    import pandas as pd
+
+    (
+        transport_model,
+        transport_scaler,
+        transport_label_encoder,
+    ) = _get_transport_resources()
 
     new_row = pd.DataFrame([
         {
-            "distance_km": data["distance_km"],
-            "budget_limit": data["budget_limit"],
-            "num_people": data["num_people"],
-            "rainfall_mm": data["rainfall_mm"],
+            "distance_km":
+                data["distance_km"],
+
+            "budget_limit":
+                data["budget_limit"],
+
+            "num_people":
+                data["num_people"],
+
+            "rainfall_mm":
+                data["rainfall_mm"],
+
             "road_access_rating":
                 data["road_access_rating"],
         }
@@ -82,7 +105,9 @@ def predict_transport(data: dict):
 
     # Predict encoded class
     predicted_class = (
-        transport_model.predict(X_scaled)[0]
+        transport_model.predict(
+            X_scaled
+        )[0]
     )
 
     # Convert class back to transport name
@@ -96,7 +121,9 @@ def predict_transport(data: dict):
     # Prediction probabilities
     probabilities = (
         transport_model
-        .predict_proba(X_scaled)[0]
+        .predict_proba(
+            X_scaled
+        )[0]
     )
 
     probability_by_mode = dict(
@@ -111,8 +138,10 @@ def predict_transport(data: dict):
             str(predicted_mode),
 
         "confidence":
-            float(max(probabilities)),
+            float(
+                max(probabilities)
+            ),
 
         "probabilities":
-            probability_by_mode
+            probability_by_mode,
     }

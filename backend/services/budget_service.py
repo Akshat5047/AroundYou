@@ -1,16 +1,6 @@
 import os
 import sqlite3
-
-import joblib
-import pandas as pd
-
-from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import (
-    OrdinalEncoder,
-    OneHotEncoder,
-    StandardScaler,
-)
+from functools import lru_cache
 
 
 # ---------------------------------------------------------
@@ -33,17 +23,10 @@ DB_PATH = os.path.join(
     "smart_tourism.db"
 )
 
-
-# ---------------------------------------------------------
-# LOAD TRAINED MODEL
-# ---------------------------------------------------------
-
 MODEL_PATH = os.path.join(
     MODEL_DIR,
     "best_trip_cost_model.pkl"
 )
-
-budget_model = joblib.load(MODEL_PATH)
 
 
 # ---------------------------------------------------------
@@ -66,7 +49,7 @@ COST_COLUMNS = [
 VALID_ACCOMMODATION_TIERS = {
     "budget",
     "mid",
-    "premium"
+    "premium",
 }
 
 ACCOMMODATION_ALIASES = {
@@ -86,22 +69,43 @@ VALID_TRANSPORT_MODES = {
 
 
 # ---------------------------------------------------------
-# REBUILD ORIGINAL PREPROCESSOR
+# LAZY MODEL LOADER
 # ---------------------------------------------------------
 
-def _build_budget_preprocessor():
+@lru_cache(maxsize=1)
+def _get_budget_model():
+    import joblib
+
+    return joblib.load(MODEL_PATH)
+
+
+# ---------------------------------------------------------
+# LAZY PREPROCESSOR
+# ---------------------------------------------------------
+
+@lru_cache(maxsize=1)
+def _get_budget_preprocessor():
+    import pandas as pd
+
+    from sklearn.compose import ColumnTransformer
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import (
+        OrdinalEncoder,
+        OneHotEncoder,
+        StandardScaler,
+    )
 
     conn = sqlite3.connect(DB_PATH)
 
-    raw_df = pd.read_sql(
-        "SELECT * FROM trip_budget_prediction;",
-        conn
-    )
-
-    conn.close()
+    try:
+        raw_df = pd.read_sql(
+            "SELECT * FROM trip_budget_prediction;",
+            conn,
+        )
+    finally:
+        conn.close()
 
     df = raw_df.copy()
-
     df.columns = df.columns.str.lower()
 
     y = df[COST_COLUMNS]
@@ -119,7 +123,7 @@ def _build_budget_preprocessor():
         X,
         y,
         test_size=0.20,
-        random_state=42
+        random_state=42,
     )
 
     preprocessor = ColumnTransformer(
@@ -127,14 +131,14 @@ def _build_budget_preprocessor():
             (
                 "ordinal",
                 OrdinalEncoder(),
-                ["accommodation_tier"]
+                ["accommodation_tier"],
             ),
             (
                 "nominal",
                 OneHotEncoder(
                     handle_unknown="ignore"
                 ),
-                ["transport_mode", "season"]
+                ["transport_mode", "season"],
             ),
             (
                 "numeric",
@@ -143,7 +147,7 @@ def _build_budget_preprocessor():
                     "duration_days",
                     "num_travelers",
                     "route_distance_km",
-                ]
+                ],
             ),
         ]
     )
@@ -153,28 +157,20 @@ def _build_budget_preprocessor():
     return preprocessor
 
 
-budget_preprocessor = (
-    _build_budget_preprocessor()
-)
-
-
 # ---------------------------------------------------------
 # NORMALIZE USER INPUT
 # ---------------------------------------------------------
 
 def _normalize_budget_inputs(data: dict):
-
     normalized = dict(data)
 
     accommodation = str(
         normalized["accommodation_tier"]
     ).strip().lower()
 
-    accommodation = (
-        ACCOMMODATION_ALIASES.get(
-            accommodation,
-            accommodation
-        )
+    accommodation = ACCOMMODATION_ALIASES.get(
+        accommodation,
+        accommodation,
     )
 
     if accommodation not in VALID_ACCOMMODATION_TIERS:
@@ -204,30 +200,36 @@ def _normalize_budget_inputs(data: dict):
 # ---------------------------------------------------------
 
 def predict_budget(data: dict):
+    import pandas as pd
 
     data = _normalize_budget_inputs(data)
 
-    new_trip = pd.DataFrame([
-        {
-            "duration_days":
-                data["duration_days"],
+    budget_model = _get_budget_model()
+    budget_preprocessor = _get_budget_preprocessor()
 
-            "num_travelers":
-                data["num_travelers"],
+    new_trip = pd.DataFrame(
+        [
+            {
+                "duration_days":
+                    data["duration_days"],
 
-            "route_distance_km":
-                data["route_distance_km"],
+                "num_travelers":
+                    data["num_travelers"],
 
-            "transport_mode":
-                data["transport_mode"],
+                "route_distance_km":
+                    data["route_distance_km"],
 
-            "accommodation_tier":
-                data["accommodation_tier"],
+                "transport_mode":
+                    data["transport_mode"],
 
-            "season":
-                data["season"],
-        }
-    ])
+                "accommodation_tier":
+                    data["accommodation_tier"],
+
+                "season":
+                    data["season"],
+            }
+        ]
+    )
 
     X_final = budget_preprocessor.transform(
         new_trip
@@ -240,12 +242,12 @@ def predict_budget(data: dict):
     result = dict(
         zip(
             COST_COLUMNS,
-            predicted[0].tolist()
+            predicted[0].tolist(),
         )
     )
 
-    result["predicted_total_cost"] = (
-        sum(result.values())
+    result["predicted_total_cost"] = sum(
+        result.values()
     )
 
     return result

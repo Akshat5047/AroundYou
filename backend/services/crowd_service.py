@@ -1,7 +1,5 @@
 import os
-
-import joblib
-import pandas as pd
+from functools import lru_cache
 
 
 # ---------------------------------------------------------
@@ -20,57 +18,71 @@ MODEL_DIR = os.path.join(
 
 
 # ---------------------------------------------------------
-# LOAD MODEL + PREPROCESSING ARTIFACTS
+# LAZY LOAD MODEL + PREPROCESSING ARTIFACTS
 # ---------------------------------------------------------
 
-crowd_model = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "crowd_model.pkl"
-    )
-)
+@lru_cache(maxsize=1)
+def _get_crowd_resources():
+    import joblib
 
-crowd_preprocessor = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "preprocessor.pkl"
+    crowd_model = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "crowd_model.pkl",
+        )
     )
-)
 
-crowd_spot_mean_map = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "spot_mean_map.pkl"
+    crowd_preprocessor = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "preprocessor.pkl",
+        )
     )
-)
 
-crowd_district_mean_map = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "district_mean_map.pkl"
+    crowd_spot_mean_map = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "spot_mean_map.pkl",
+        )
     )
-)
 
-crowd_month_mean_map = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "month_mean_map.pkl"
+    crowd_district_mean_map = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "district_mean_map.pkl",
+        )
     )
-)
 
-crowd_season_mean_map = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "season_mean_map.pkl"
+    crowd_month_mean_map = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "month_mean_map.pkl",
+        )
     )
-)
 
-crowd_global_mean = joblib.load(
-    os.path.join(
-        MODEL_DIR,
-        "global_visitor_mean.pkl"
+    crowd_season_mean_map = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "season_mean_map.pkl",
+        )
     )
-)
+
+    crowd_global_mean = joblib.load(
+        os.path.join(
+            MODEL_DIR,
+            "global_visitor_mean.pkl",
+        )
+    )
+
+    return (
+        crowd_model,
+        crowd_preprocessor,
+        crowd_spot_mean_map,
+        crowd_district_mean_map,
+        crowd_month_mean_map,
+        crowd_season_mean_map,
+        crowd_global_mean,
+    )
 
 
 # ---------------------------------------------------------
@@ -78,6 +90,17 @@ crowd_global_mean = joblib.load(
 # ---------------------------------------------------------
 
 def predict_crowd(data: dict):
+    import pandas as pd
+
+    (
+        crowd_model,
+        crowd_preprocessor,
+        crowd_spot_mean_map,
+        crowd_district_mean_map,
+        crowd_month_mean_map,
+        crowd_season_mean_map,
+        crowd_global_mean,
+    ) = _get_crowd_resources()
 
     new_row = pd.DataFrame([data])
 
@@ -129,7 +152,6 @@ def predict_crowd(data: dict):
         predicted_visitors[0]
     )
 
-    # Visitor count should never be negative
     visitors = max(0.0, visitors)
 
     return {
