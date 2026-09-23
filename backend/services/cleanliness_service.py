@@ -40,8 +40,6 @@ def get_session():
             )
 
         options = ort.SessionOptions()
-
-        # Keep memory/CPU usage controlled on Render.
         options.intra_op_num_threads = 1
         options.inter_op_num_threads = 1
 
@@ -103,7 +101,6 @@ def preprocess_image(image: Image.Image):
         (2, 0, 1),
     )
 
-    # Add batch dimension.
     array = np.expand_dims(
         array,
         axis=0,
@@ -143,20 +140,14 @@ def calculate_iou(box1, box2):
         * intersection_height
     )
 
-    area1 = max(
-        0.0,
-        box1[2] - box1[0],
-    ) * max(
-        0.0,
-        box1[3] - box1[1],
+    area1 = (
+        max(0.0, box1[2] - box1[0])
+        * max(0.0, box1[3] - box1[1])
     )
 
-    area2 = max(
-        0.0,
-        box2[2] - box2[0],
-    ) * max(
-        0.0,
-        box2[3] - box2[1],
+    area2 = (
+        max(0.0, box2[2] - box2[0])
+        * max(0.0, box2[3] - box2[1])
     )
 
     union = area1 + area2 - intersection
@@ -207,13 +198,16 @@ def process_output(
 ):
     prediction = np.squeeze(output)
 
-    # Typical YOLOv8 ONNX output:
-    # (1, 5, 8400) for one-class detector.
+    # Typical one-class YOLOv8 ONNX output:
+    #
+    # (1, 5, 8400)
     #
     # After squeeze:
+    #
     # (5, 8400)
     #
     # Convert to:
+    #
     # (8400, 5)
 
     if (
@@ -328,14 +322,34 @@ def calculate_cleanliness(
     image_height,
 ):
     """
-    Application-level cleanliness indicator.
+    Calculate an application-level visible-litter indicator.
 
-    This is NOT an objective measurement of the physical
-    cleanliness of an entire tourist destination.
+    This is NOT a direct output of the YOLO model.
 
-    The score is based only on visible litter detected in the
-    uploaded image.
+    YOLO only detects visible litter.
+
+    The score combines:
+    1. Number of litter detections
+    2. Detection confidence
+    3. Approximate image area occupied by detected litter
+
+    A score of 100 means no litter was detected.
+
+    If litter is detected, the image will never be labelled
+    completely "Clean".
     """
+
+    # --------------------------------------------------------
+    # NO LITTER DETECTED
+    # --------------------------------------------------------
+
+    if not detections:
+        return {
+            "score": 100.0,
+            "status": "Clean",
+            "coverage_percent": 0.0,
+            "average_confidence": 0.0,
+        }
 
     image_area = float(
         image_width
@@ -343,46 +357,89 @@ def calculate_cleanliness(
     )
 
     if image_area <= 0:
-        return 100.0, "Clean"
+        image_area = 1.0
 
-    litter_area = 0.0
+    # --------------------------------------------------------
+    # DETECTION COUNT
+    # --------------------------------------------------------
+
+    detection_count = len(
+        detections
+    )
+
+    # --------------------------------------------------------
+    # CONFIDENCE
+    # --------------------------------------------------------
+
+    average_confidence = sum(
+        detection["confidence"]
+        for detection in detections
+    ) / detection_count
+
+    # --------------------------------------------------------
+    # LITTER COVERAGE
+    # --------------------------------------------------------
+
+    total_litter_area = 0.0
 
     for detection in detections:
         x1, y1, x2, y2 = detection["box"]
 
-        area = max(
-            0.0,
-            x2 - x1,
-        ) * max(
-            0.0,
-            y2 - y1,
+        box_area = (
+            max(0.0, x2 - x1)
+            * max(0.0, y2 - y1)
         )
 
-        # Confidence-weighted visible litter area.
-        litter_area += (
-            area
+        # Confidence weighting reduces the impact of uncertain
+        # detections.
+        total_litter_area += (
+            box_area
             * detection["confidence"]
         )
 
-    coverage = min(
-        litter_area / image_area,
+    coverage_ratio = min(
+        total_litter_area / image_area,
         1.0,
     )
 
-    detection_penalty = min(
-        len(detections) * 4.0,
-        35.0,
+    coverage_percent = (
+        coverage_ratio * 100.0
     )
 
+    # --------------------------------------------------------
+    # PENALTIES
+    # --------------------------------------------------------
+
+    # Every detected litter object contributes to the score.
+    #
+    # Cap prevents an extreme number of boxes from completely
+    # dominating the result.
+    count_penalty = min(
+        detection_count * 7.0,
+        42.0,
+    )
+
+    # Higher-confidence detections should have greater impact.
+    confidence_penalty = min(
+        average_confidence * 10.0,
+        10.0,
+    )
+
+    # Larger visible litter regions should have greater impact.
     coverage_penalty = min(
-        coverage * 300.0,
-        55.0,
+        coverage_ratio * 250.0,
+        38.0,
+    )
+
+    total_penalty = (
+        count_penalty
+        + confidence_penalty
+        + coverage_penalty
     )
 
     score = (
         100.0
-        - detection_penalty
-        - coverage_penalty
+        - total_penalty
     )
 
     score = max(
@@ -390,16 +447,36 @@ def calculate_cleanliness(
         min(100.0, score),
     )
 
-    if score >= 80:
-        status = "Clean"
+    # --------------------------------------------------------
+    # STATUS
+    # --------------------------------------------------------
 
-    elif score >= 55:
-        status = "Moderate"
+    # Important:
+    #
+    # Any detected litter prevents the result from being
+    # labelled "Clean".
+
+    if score >= 70:
+        status = "Light Litter"
+
+    elif score >= 45:
+        status = "Moderate Litter"
 
     else:
-        status = "Poor"
+        status = "Heavy Litter"
 
-    return round(score, 1), status
+    return {
+        "score": round(score, 1),
+        "status": status,
+        "coverage_percent": round(
+            coverage_percent,
+            2,
+        ),
+        "average_confidence": round(
+            average_confidence,
+            4,
+        ),
+    }
 
 
 # ============================================================
@@ -498,7 +575,7 @@ def analyze_cleanliness(
         metadata,
     )
 
-    score, status = calculate_cleanliness(
+    cleanliness = calculate_cleanliness(
         detections,
         image.width,
         image.height,
@@ -509,14 +586,17 @@ def analyze_cleanliness(
         detections,
     )
 
-    # Round values before returning them.
     clean_detections = []
 
     for detection in detections:
         clean_detections.append(
             {
-                "class_id": detection["class_id"],
-                "class_name": detection["class_name"],
+                "class_id": (
+                    detection["class_id"]
+                ),
+                "class_name": (
+                    detection["class_name"]
+                ),
                 "confidence": round(
                     detection["confidence"],
                     4,
@@ -530,17 +610,35 @@ def analyze_cleanliness(
         )
 
     return {
-        "cleanliness_score": score,
-        "status": status,
+        "cleanliness_score": (
+            cleanliness["score"]
+        ),
+        "status": (
+            cleanliness["status"]
+        ),
         "litter_count": len(
             clean_detections
         ),
-        "detections": clean_detections,
-        "annotated_image": annotated_bytes,
+        "litter_coverage_percent": (
+            cleanliness[
+                "coverage_percent"
+            ]
+        ),
+        "average_confidence": (
+            cleanliness[
+                "average_confidence"
+            ]
+        ),
+        "detections": (
+            clean_detections
+        ),
+        "annotated_image": (
+            annotated_bytes
+        ),
         "disclaimer": (
-            "This cleanliness indicator is based only on "
-            "visible litter detected in the uploaded image. "
-            "It is not an objective assessment of the entire "
-            "location."
+            "This is an AI-generated visible-litter indicator "
+            "based only on litter detected in the uploaded "
+            "image. It does not represent the overall "
+            "cleanliness of the entire location."
         ),
     }

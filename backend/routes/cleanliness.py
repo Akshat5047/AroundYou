@@ -87,9 +87,19 @@ async def analyze_uploaded_image(
         "cleanliness_score": (
             result["cleanliness_score"]
         ),
-        "status": result["status"],
+        "status": (
+            result["status"]
+        ),
         "litter_count": (
             result["litter_count"]
+        ),
+        "litter_coverage_percent": (
+            result[
+                "litter_coverage_percent"
+            ]
+        ),
+        "average_confidence": (
+            result["average_confidence"]
         ),
         "detections": (
             result["detections"]
