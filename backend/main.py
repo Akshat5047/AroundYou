@@ -9,6 +9,7 @@ from routes.review import router as review_router
 from routes.rag import router as rag_router
 from routes.agent import router as agent_router
 from routes.cleanliness import router as cleanliness_router
+from routes.destinations import router as destinations_router
 
 
 app = FastAPI(
@@ -34,6 +35,7 @@ app.include_router(review_router)
 app.include_router(rag_router)
 app.include_router(agent_router)
 app.include_router(cleanliness_router)
+app.include_router(destinations_router)
 
 
 @app.get("/api/health")
