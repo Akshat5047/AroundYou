@@ -8,17 +8,14 @@ from routes.transport import router as transport_router
 from routes.review import router as review_router
 from routes.rag import router as rag_router
 from routes.agent import router as agent_router
+from routes.cleanliness import router as cleanliness_router
 
 
 app = FastAPI(
     title="Around You API",
-    version="1.0.0"
+    version="1.0.0",
 )
 
-
-# ============================================================
-# CORS
-# ============================================================
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,10 +26,6 @@ app.add_middleware(
 )
 
 
-# ============================================================
-# ROUTERS
-# ============================================================
-
 app.include_router(climate_router)
 app.include_router(budget_router)
 app.include_router(crowd_router)
@@ -40,15 +33,12 @@ app.include_router(transport_router)
 app.include_router(review_router)
 app.include_router(rag_router)
 app.include_router(agent_router)
+app.include_router(cleanliness_router)
 
-
-# ============================================================
-# HEALTH CHECK
-# ============================================================
 
 @app.get("/api/health")
 def health_check():
     return {
         "status": "ok",
-        "service": "Around You API"
+        "service": "Around You API",
     }
