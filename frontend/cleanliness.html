@@ -1,0 +1,380 @@
+<!doctype html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width,initial-scale=1">
+
+    <title>
+        Cleanliness Analyzer | Around You
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css">
+
+</head>
+
+<body>
+
+
+<nav class="nav">
+
+    <div class="container navin">
+
+        <a
+            class="brand"
+            href="index.html">
+
+            Around <span>You</span>
+
+        </a>
+
+
+        <div class="links">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="explore.html">
+                Explore
+            </a>
+
+            <a href="planner.html">
+                Plan a Trip
+            </a>
+
+            <a href="ask.html">
+                Ask Around You
+            </a>
+
+            <a href="reviews.html">
+                Review Trust
+            </a>
+
+            <a href="cleanliness.html">
+                Cleanliness
+            </a>
+
+        </div>
+
+
+        <a
+            class="btn primary"
+            href="planner.html">
+
+            Plan My Trip
+
+        </a>
+
+    </div>
+
+</nav>
+
+
+<section class="pageHero">
+
+    <div class="container">
+
+        <span class="eyebrow">
+            Computer Vision
+        </span>
+
+        <h1>
+            Cleanliness Analyzer
+        </h1>
+
+        <p class="muted cleanlinessIntro">
+            Upload an image of a destination and Around You
+            will analyze visible litter using the trained
+            object-detection model.
+        </p>
+
+    </div>
+
+</section>
+
+
+<section class="section cleanlinessSection">
+
+    <div class="container">
+
+        <div class="cleanlinessLayout">
+
+
+            <!-- UPLOAD PANEL -->
+
+            <div class="formCard">
+
+                <h2>
+                    Upload destination image
+                </h2>
+
+                <p class="muted">
+                    Choose a JPEG, PNG or WebP image.
+                </p>
+
+
+                <form id="cleanlinessForm">
+
+                    <div class="uploadArea">
+
+                        <input
+                            id="cleanlinessImage"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            required>
+
+                        <div
+                            id="previewPlaceholder"
+                            class="uploadPlaceholder">
+
+                            <div class="uploadIcon">
+                                ◎
+                            </div>
+
+                            <strong>
+                                Select an image
+                            </strong>
+
+                            <span>
+                                Maximum file size: 10 MB
+                            </span>
+
+                        </div>
+
+
+                        <img
+                            id="imagePreview"
+                            class="imagePreview"
+                            alt="Selected image preview">
+
+                    </div>
+
+
+                    <button
+                        class="btn primary analyzeButton"
+                        type="submit">
+
+                        Analyze Cleanliness
+
+                    </button>
+
+                </form>
+
+
+                <div
+                    id="cleanlinessError"
+                    class="error">
+                </div>
+
+            </div>
+
+
+            <!-- RESULT AREA -->
+
+            <div>
+
+                <div
+                    id="cleanlinessLoading"
+                    class="loading resultCard">
+
+                    <div class="spinner"></div>
+
+                    <p>
+                        Analyzing visible litter...
+                    </p>
+
+                    <small class="muted">
+                        The deployed AI service may take a
+                        moment to respond.
+                    </small>
+
+                </div>
+
+
+                <div
+                    id="cleanlinessResult"
+                    class="result">
+
+
+                    <div class="resultCard">
+
+                        <span class="eyebrow">
+                            Analysis Result
+                        </span>
+
+                        <div class="scoreHeader">
+
+                            <div>
+
+                                <span class="muted">
+                                    Cleanliness Score
+                                </span>
+
+                                <div
+                                    id="cleanlinessScore"
+                                    class="cleanlinessScore">
+
+                                    --
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                id="cleanlinessStatus"
+                                class="cleanlinessStatus">
+
+                                --
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="metrics cleanlinessMetrics">
+
+                            <div class="metric">
+
+                                <span class="muted">
+                                    Litter Detected
+                                </span>
+
+                                <b id="litterCount">
+                                    --
+                                </b>
+
+                            </div>
+
+
+                            <div class="metric">
+
+                                <span class="muted">
+                                    Visible Coverage
+                                </span>
+
+                                <b id="litterCoverage">
+                                    --
+                                </b>
+
+                            </div>
+
+
+                            <div class="metric">
+
+                                <span class="muted">
+                                    Avg. Confidence
+                                </span>
+
+                                <b id="averageConfidence">
+                                    --
+                                </b>
+
+                            </div>
+
+
+                            <div class="metric">
+
+                                <span class="muted">
+                                    Model
+                                </span>
+
+                                <b>
+                                    YOLOv8
+                                </b>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="resultCard">
+
+                        <h2>
+                            Detected Image
+                        </h2>
+
+                        <p class="muted">
+                            Bounding boxes show areas where
+                            visible litter was detected.
+                        </p>
+
+
+                        <img
+                            id="annotatedImage"
+                            class="annotatedImage"
+                            alt="AI annotated litter detection">
+
+                    </div>
+
+
+                    <div class="resultCard">
+
+                        <h3>
+                            Detection Details
+                        </h3>
+
+                        <div
+                            id="detectionList"
+                            class="detectionList">
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="cleanlinessDisclaimer"
+                        class="notice">
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<footer class="footer">
+
+    <div class="container footerin">
+
+        <div>
+
+            <b>
+                Around You
+            </b>
+
+            <p>
+                Discover Telangana. Plan Smarter.
+                Travel Better.
+            </p>
+
+        </div>
+
+        <small>
+            AI-powered travel guidance for Telangana.
+        </small>
+
+    </div>
+
+</footer>
+
+
+<script src="js/api.js"></script>
+<script src="js/cleanliness.js"></script>
+
+</body>
+</html>

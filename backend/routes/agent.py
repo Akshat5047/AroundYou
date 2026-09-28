@@ -76,6 +76,9 @@ def create_trip_plan(
         result = plan_trip(
             user_request=request.request,
             district=request.district,
+            selected_destinations=(
+    request.selected_destinations
+),
             travel_date=request.travel_date,
             budget_limit=request.budget_limit,
             num_travelers=request.num_travelers,

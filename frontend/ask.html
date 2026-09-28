@@ -1,1 +1,3422 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ask Around You | Around You</title><link rel="stylesheet" href="css/style.css"></head><body><nav class="nav"><div class="container navin"><a class="brand" href="index.html">Around <span>You</span></a><div class="links"><a href="index.html">Home</a><a href="explore.html">Explore</a><a href="planner.html">Plan a Trip</a><a href="ask.html">Ask Around You</a><a href="reviews.html">Review Trust</a></div><a class="btn primary" href="planner.html">Plan My Trip</a></div></nav><main><section class="pageHero"><div class="container"><span class="eyebrow">Grounded travel Q&A</span><h1>Ask Around You</h1><p class="muted">Ask about destinations in our Telangana knowledge base.</p></div></section><section class="section"><div class="container" style="max-width:850px"><form id="ask" class="formCard"><div class="field"><label>Your question</label><textarea id="q" rows="4" placeholder="What can I see at Golconda Fort?" required></textarea></div><button class="btn primary" style="margin-top:12px">Ask Around You</button><div id="err" class="error"></div></form><div id="load" class="loading"><div class="spinner"></div></div><div id="out" class="answer"></div></div></section></main><script src="js/rag.js"></script><footer class="footer"><div class="container footerin"><div><b>Around You</b><p>Discover Telangana. Plan Smarter. Travel Better.</p></div><small>AI-powered travel guidance for Telangana.</small></div></footer><script src="js/api.js"></script></body></html>
+<!doctype html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width,initial-scale=1">
+
+    <title>
+        Ask Around You | Around You
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css">
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     NAVIGATION
+     ========================================================= -->
+
+<nav class="nav">
+
+    <div class="container navin">
+
+        <a
+            class="brand"
+            href="index.html">
+
+            Around <span>You</span>
+
+        </a>
+
+
+        <div class="links">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="explore.html">
+                Explore
+            </a>
+
+            <a href="planner.html">
+                Plan a Trip
+            </a>
+
+            <a href="ask.html">
+                Ask Around You
+            </a>
+
+            <a href="reviews.html">
+                Review Trust
+            </a>
+
+            <a href="cleanliness.html">
+                Cleanliness
+            </a>
+
+        </div>
+
+
+        <a
+            class="btn primary"
+            href="planner.html">
+
+            Plan My Trip
+
+        </a>
+
+    </div>
+
+</nav>
+
+
+
+<main>
+
+
+<!-- =========================================================
+     PAGE HERO
+     ========================================================= -->
+
+<section class="pageHero">
+
+    <div class="container">
+
+        <span class="eyebrow">
+            AI-powered Telangana travel assistant
+        </span>
+
+        <h1>
+            Ask Around You
+        </h1>
+
+        <p class="muted">
+            Discover destinations, understand your trip and
+            explore Around You's travel intelligence.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     ASSISTANT WORKSPACE
+     ========================================================= -->
+
+<section class="section">
+
+    <div
+        class="container askWorkspace">
+
+
+        <!-- =================================================
+             MAIN ASSISTANT AREA
+             ================================================= -->
+
+        <div class="askMain">
+
+
+            <!-- QUICK ACTIONS -->
+
+            <div class="formCard askWelcomeCard">
+
+                <span class="eyebrow">
+                    Travel Assistant
+                </span>
+
+                <h2>
+                    What can I help you discover?
+                </h2>
+
+                <p class="muted">
+                    Choose a travel topic or ask your own
+                    question about Telangana.
+                </p>
+
+
+                <div class="askQuickGrid">
+
+
+                    <button
+                        type="button"
+                        class="askQuickAction"
+                        data-prompt="Help me discover places to visit in Telangana.">
+
+                        <strong>
+                            Places to Visit
+                        </strong>
+
+                        <span>
+                            Discover destinations that match
+                            your interests.
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="askQuickAction"
+                        id="askBudgetAction">
+
+                        <strong>
+                            Budget Advisor
+                        </strong>
+
+                        <span>
+                            Plan how to spend your budget wisely
+                            for selected destinations.
+                        </span>
+
+                    </button>
+
+
+                    <button
+    type="button"
+    class="askQuickAction"
+    id="askWeatherAction">
+
+    <strong>
+        Weather
+    </strong>
+
+    <span>
+        Check climate predictions for
+        your selected destinations.
+    </span>
+
+</button>
+
+
+                    <button
+    type="button"
+    class="askQuickAction"
+    id="askCrowdAction">
+
+    <strong>
+        Crowd Insights
+    </strong>
+
+    <span>
+        Predict visitor volumes for
+        your selected destinations.
+    </span>
+
+</button>
+
+
+                    <button
+                        type="button"
+                        class="askQuickAction"
+                        id="askTransportAction">
+
+                        <strong>
+                            Transport
+                        </strong>
+
+                        <span>
+                            Get a budget-aware transport recommendation
+                            for your selected destinations.
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="askQuickAction"
+                        id="askDecideAction">
+
+                        <strong>
+                            Help Me Decide
+                        </strong>
+
+                        <span>
+                            Compare your selected destinations using
+                            weather, crowd, cost and travel practicality.
+                        </span>
+
+                    </button>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 ASK / CONVERSATION AREA
+                 ================================================= -->
+
+            <div class="formCard askChatCard">
+
+                <div class="askChatHeader">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            Conversation
+                        </span>
+
+                        <h2>
+                            Around You Assistant
+                        </h2>
+
+                    </div>
+
+                    <span class="tag">
+                        Grounded Travel Q&A
+                    </span>
+
+                </div>
+
+<!-- =================================================
+INTERACTIVE TOOL WORKSPACE
+    ================================================= -->
+
+<div
+    id="askToolWorkspace"
+    class="askToolWorkspace"
+    style="display:none;">
+</div>
+
+                <!-- Existing RAG output stays compatible -->
+
+                <div
+                    id="out"
+                    class="answer">
+                </div>
+
+
+                <!-- Loading -->
+
+                <div
+                    id="load"
+                    class="loading">
+
+                    <div class="spinner"></div>
+
+                </div>
+
+
+                <!-- Error -->
+
+                <div
+                    id="err"
+                    class="error">
+                </div>
+
+
+                <!-- Existing RAG form -->
+
+                <form
+                    id="ask"
+                    class="askComposer">
+
+                    <div class="field">
+
+                        <label for="q">
+                            Ask Around You
+                        </label>
+
+                        <textarea
+                            id="q"
+                            rows="3"
+                            placeholder="Ask about destinations, budgets, weather, crowds or transport..."
+                            required></textarea>
+
+                    </div>
+
+
+                    <div class="askComposerBottom">
+
+                        <small class="muted">
+                            Destination answers are grounded
+                            using Around You's available
+                            Telangana knowledge base.
+                        </small>
+
+
+                        <button
+                            type="submit"
+                            class="btn primary">
+
+                            Ask →
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             SIDEBAR
+             ================================================= -->
+
+        <aside class="askSidebar">
+
+
+            <!-- CURRENT TRIP -->
+
+            <div class="formCard">
+
+                <span class="eyebrow">
+                    Your Trip
+                </span>
+
+                <h2>
+                    Selected destinations
+                </h2>
+
+                <p
+                    id="askTripCount"
+                    class="muted">
+
+                    No destinations selected.
+
+                </p>
+
+
+                <div
+                    id="askTripDestinations"
+                    class="askTripDestinations">
+
+                    <p class="muted">
+                        Destinations selected from Home,
+                        Explore or Planner will appear here.
+                    </p>
+
+                </div>
+
+
+                <a
+                    id="askContinuePlanning"
+                    href="planner.html?selected=1"
+                    class="btn primary full">
+
+                    Continue Planning →
+
+                </a>
+
+            </div>
+
+
+
+            <!-- QUICK QUESTIONS -->
+
+            <div class="formCard">
+
+                <span class="eyebrow">
+                    Quick Questions
+                </span>
+
+                <h3>
+                    Try asking
+                </h3>
+
+
+                <div class="askQuestionList">
+
+
+                    <button
+                        type="button"
+                        class="askQuestion"
+                        data-question="What are some places I can visit in Telangana?">
+
+                        What places should I visit?
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="askQuestion"
+                        data-question="What nature destinations can I visit in Telangana?">
+
+                        Show me nature destinations
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="askQuestion"
+                        data-question="What heritage destinations can I visit in Telangana?">
+
+                        Show me heritage destinations
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="askQuestion"
+                        data-question="Tell me about destinations in Hyderabad.">
+
+                        What can I visit in Hyderabad?
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="askQuestion"
+                        data-question="Help me choose destinations for my trip.">
+
+                        Help me choose destinations
+
+                    </button>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CONNECTION TO EXPLORE -->
+
+            <div class="formCard">
+
+                <span class="eyebrow">
+                    Discover More
+                </span>
+
+                <h3>
+                    Browse destinations
+                </h3>
+
+                <p class="muted">
+                    Explore the complete destination collection
+                    and add places to your trip.
+                </p>
+
+
+                <a
+                    href="explore.html"
+                    class="btn secondary full">
+
+                    Explore Telangana →
+
+                </a>
+
+            </div>
+
+
+        </aside>
+
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
+
+<footer class="footer">
+
+    <div class="container footerin">
+
+        <div>
+
+            <b>
+                Around You
+            </b>
+
+            <p>
+                Discover Telangana. Plan Smarter.
+                Travel Better.
+            </p>
+
+        </div>
+
+
+        <small>
+            AI-powered travel guidance for Telangana.
+        </small>
+
+    </div>
+
+</footer>
+
+
+
+<!-- =========================================================
+     EXISTING API + RAG
+     ========================================================= -->
+
+<script src="js/api.js"></script>
+<script src="js/rag.js"></script>
+
+
+
+<!-- =========================================================
+     TEMPORARY ASK INTERACTIONS
+     ========================================================= -->
+
+<script>
+
+const ASK_SELECTED_KEY =
+    "aroundYouSelectedDestinations";
+
+const ASK_BUDGET_KEY =
+    "aroundYouLatestBudget";
+
+
+const askQuestionInput =
+    document.querySelector("#q");
+
+const askTripDestinations =
+    document.querySelector(
+        "#askTripDestinations"
+    );
+
+const askTripCount =
+    document.querySelector(
+        "#askTripCount"
+    );
+
+const askContinuePlanning =
+    document.querySelector(
+        "#askContinuePlanning"
+    );
+
+    const askWeatherAction =
+    document.querySelector(
+        "#askWeatherAction"
+    );
+
+    const askCrowdAction =
+    document.querySelector(
+        "#askCrowdAction"
+    );
+
+    const askBudgetAction =
+    document.querySelector(
+        "#askBudgetAction"
+    );
+
+    const askTransportAction =
+    document.querySelector(
+        "#askTransportAction"
+    );
+
+    const askDecideAction =
+    document.querySelector(
+        "#askDecideAction"
+    );
+
+const askToolWorkspace =
+    document.querySelector(
+        "#askToolWorkspace"
+    );
+
+const askRagOutput =
+    document.querySelector(
+        "#out"
+    );
+
+    function getAskDefaultDate() {
+
+    const today =
+        new Date();
+
+    const year =
+        today.getFullYear();
+
+    const month =
+        String(
+            today.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            today.getDate()
+        ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function openWeatherTool() {
+
+    const destinations =
+        loadAskTrip();
+
+
+    if (!askToolWorkspace) {
+        return;
+    }
+
+
+    if (!destinations.length) {
+
+        askToolWorkspace.style.display =
+            "block";
+
+        askToolWorkspace.innerHTML = `
+
+            <div class="askToolEmpty">
+
+                <span class="eyebrow">
+                    Weather Insight
+                </span>
+
+                <h3>
+                    Select a destination first
+                </h3>
+
+                <p class="muted">
+                    Add a destination from Home,
+                    Explore or Planner before checking
+                    its climate prediction.
+                </p>
+
+                <a
+                    href="explore.html"
+                    class="btn secondary">
+
+                    Explore Destinations →
+
+                </a>
+
+            </div>
+        `;
+
+        askToolWorkspace.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+        return;
+    }
+
+
+    const options =
+        destinations
+            .map(
+                (destination, index) => {
+
+                    const name =
+                        destination.name ||
+                        destination.spot_name ||
+                        "Destination";
+
+                    const district =
+                        destination.district ||
+                        "";
+
+                    return `
+
+                        <option
+                            value="${index}">
+
+                            ${esc(name)}
+                            ${
+                                district
+                                    ? ` — ${esc(district)}`
+                                    : ""
+                            }
+
+                        </option>
+                    `;
+                }
+            )
+            .join("");
+
+
+    askToolWorkspace.style.display =
+        "block";
+
+
+    askToolWorkspace.innerHTML = `
+
+        <div class="askToolPanel">
+
+            <div class="askToolHeader">
+
+                <div>
+
+                    <span class="eyebrow">
+                        Climate Model
+                    </span>
+
+                    <h3>
+                        Weather Insight
+                    </h3>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="closeWeatherTool"
+                    class="askToolClose"
+                    aria-label="Close">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+            <p class="muted">
+
+                Select one of your trip destinations
+                and a travel date to generate a
+                district-level climate prediction.
+
+            </p>
+
+
+            <div class="askToolFields">
+
+                <div class="field">
+
+                    <label for="weatherDestination">
+                        Destination
+                    </label>
+
+                    <select id="weatherDestination">
+
+                        ${options}
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="weatherDate">
+                        Travel Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="weatherDate"
+                        value="${getAskDefaultDate()}">
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="runWeatherPrediction"
+                class="btn primary">
+
+                Check Weather →
+
+            </button>
+
+
+            <div
+                id="weatherResult"
+                class="askToolResult">
+            </div>
+
+        </div>
+    `;
+
+
+    document
+        .querySelector(
+            "#closeWeatherTool"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                askToolWorkspace.style.display =
+                    "none";
+
+                askToolWorkspace.innerHTML =
+                    "";
+            }
+        );
+
+
+    document
+        .querySelector(
+            "#runWeatherPrediction"
+        )
+        ?.addEventListener(
+            "click",
+            runWeatherPrediction
+        );
+
+
+    askToolWorkspace.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
+
+// ============================================================
+// RUN WEATHER PREDICTION
+// ============================================================
+
+async function runWeatherPrediction() {
+
+    const destinationSelect =
+        document.querySelector(
+            "#weatherDestination"
+        );
+
+    const dateInput =
+        document.querySelector(
+            "#weatherDate"
+        );
+
+    const resultBox =
+        document.querySelector(
+            "#weatherResult"
+        );
+
+
+    if (
+        !destinationSelect ||
+        !dateInput ||
+        !resultBox
+    ) {
+        return;
+    }
+
+
+    const destinations =
+        loadAskTrip();
+
+
+    const selectedIndex =
+        Number(
+            destinationSelect.value
+        );
+
+
+    const destination =
+        destinations[selectedIndex];
+
+
+    if (!destination) {
+
+        resultBox.innerHTML = `
+
+            <div class="error">
+                Please select a destination.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const district =
+        String(
+            destination.district || ""
+        ).trim();
+
+
+    const forecastDate =
+        dateInput.value;
+
+
+    if (!district) {
+
+        resultBox.innerHTML = `
+
+            <div class="error">
+
+                District information is unavailable
+                for this destination.
+
+            </div>
+        `;
+
+        return;
+    }
+
+
+    if (!forecastDate) {
+
+        resultBox.innerHTML = `
+
+            <div class="error">
+                Please select a travel date.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    resultBox.innerHTML = `
+
+        <div class="loading active">
+
+            <div class="spinner"></div>
+
+        </div>
+    `;
+
+
+    try {
+
+        const prediction =
+            await apiPost(
+                "/api/climate/predict",
+                {
+                    district:
+                        district,
+
+                    forecast_date:
+                        forecastDate
+                }
+            );
+
+
+        if (
+            prediction &&
+            prediction.error
+        ) {
+
+            throw new Error(
+                prediction.error
+            );
+        }
+
+
+        renderWeatherResult(
+            destination,
+            prediction
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Weather prediction failed:",
+            error
+        );
+
+
+        resultBox.innerHTML = `
+
+            <div class="error">
+
+                ${esc(
+                    error.message ||
+                    "Unable to generate weather prediction."
+                )}
+
+            </div>
+        `;
+    }
+}
+
+// ============================================================
+// DISPLAY WEATHER RESULT
+// ============================================================
+
+function renderWeatherResult(
+    destination,
+    prediction
+) {
+
+    const resultBox =
+        document.querySelector(
+            "#weatherResult"
+        );
+
+
+    if (!resultBox) {
+        return;
+    }
+
+
+    const name =
+        destination.name ||
+        destination.spot_name ||
+        "Destination";
+
+
+    const district =
+        destination.district ||
+        "";
+
+
+    const maxTemp =
+        Number(
+            prediction?.Temperature_Max_C
+        );
+
+
+    const minTemp =
+        Number(
+            prediction?.Temperature_Min_C
+        );
+
+
+    const rainfall =
+        Number(
+            prediction?.Rainfall_Percent
+        );
+
+
+    const maxTempText =
+        Number.isFinite(maxTemp)
+            ? `${maxTemp.toFixed(1)}°C`
+            : "—";
+
+
+    const minTempText =
+        Number.isFinite(minTemp)
+            ? `${minTemp.toFixed(1)}°C`
+            : "—";
+
+
+    const rainfallText =
+        Number.isFinite(rainfall)
+            ? `${rainfall.toFixed(1)}%`
+            : "—";
+
+
+    resultBox.innerHTML = `
+
+        <div class="askInsightCard">
+
+            <div class="askInsightHeader">
+
+                <div>
+
+                    <span class="eyebrow">
+                        Weather Prediction
+                    </span>
+
+
+                    <h3>
+                        ${esc(name)}
+                    </h3>
+
+
+                    <p class="muted">
+
+                        ${esc(district)}
+
+                        ${
+                            prediction?.forecast_date
+                                ? ` · ${esc(
+                                    prediction.forecast_date
+                                )}`
+                                : ""
+                        }
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="askInsightGrid">
+
+
+                <div class="askInsightMetric">
+
+                    <span>
+                        Maximum Temperature
+                    </span>
+
+                    <strong>
+                        ${maxTempText}
+                    </strong>
+
+                </div>
+
+
+                <div class="askInsightMetric">
+
+                    <span>
+                        Minimum Temperature
+                    </span>
+
+                    <strong>
+                        ${minTempText}
+                    </strong>
+
+                </div>
+
+
+                <div class="askInsightMetric">
+
+                    <span>
+                        Rainfall Probability
+                    </span>
+
+                    <strong>
+                        ${rainfallText}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <p class="muted">
+
+                Prediction generated using the
+                Around You climate model.
+
+            </p>
+
+        </div>
+    `;
+}
+
+// ============================================================
+// CROWD INSIGHTS
+// ============================================================
+
+
+// ============================================================
+// DERIVE SEASON FROM DATE
+// ============================================================
+
+function getCrowdSeason(month) {
+
+    if (
+        month === 12 ||
+        month === 1 ||
+        month === 2
+    ) {
+        return "Winter";
+    }
+
+
+    if (
+        month >= 3 &&
+        month <= 5
+    ) {
+        return "Summer";
+    }
+
+
+    if (
+        month >= 6 &&
+        month <= 9
+    ) {
+        return "Monsoon";
+    }
+
+
+    return "Post-Monsoon";
+}
+
+
+
+// ============================================================
+// OPEN CROWD TOOL
+// ============================================================
+
+function openCrowdTool() {
+    const destinations = loadAskTrip();
+    if (!askToolWorkspace) return;
+
+    if (!destinations.length) {
+        askToolWorkspace.style.display = "block";
+        askToolWorkspace.innerHTML = `
+            <div class="askToolEmpty">
+                <span class="eyebrow">Crowd Insight</span>
+                <h3>Select a destination first</h3>
+                <p class="muted">
+                    Add a destination from Home, Explore or Planner before
+                    generating a crowd prediction.
+                </p>
+                <a href="explore.html" class="btn secondary">Explore Destinations →</a>
+            </div>`;
+        askToolWorkspace.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+    }
+
+    const options = destinations.map((destination, index) => {
+        const name = destination.name || destination.spot_name || "Destination";
+        const district = destination.district || "";
+        return `<option value="${index}">${esc(name)}${district ? ` — ${esc(district)}` : ""}</option>`;
+    }).join("");
+
+    askToolWorkspace.style.display = "block";
+    askToolWorkspace.innerHTML = `
+        <div class="askToolPanel">
+            <div class="askToolHeader">
+                <div>
+                    <span class="eyebrow">Crowd Model</span>
+                    <h3>Crowd Insight</h3>
+                </div>
+                <button type="button" id="closeCrowdTool" class="askToolClose" aria-label="Close">×</button>
+            </div>
+
+            <p class="muted">
+                Select one of your trip destinations and a travel date to estimate visitor volume.
+            </p>
+
+            <div class="askToolFields">
+                <div class="field">
+                    <label for="crowdDestination">Destination</label>
+                    <select id="crowdDestination">${options}</select>
+                </div>
+                <div class="field">
+                    <label for="crowdDate">Travel Date</label>
+                    <input type="date" id="crowdDate" value="${getAskDefaultDate()}">
+                </div>
+            </div>
+
+            <button type="button" id="runCrowdPrediction" class="btn primary">Predict Crowd →</button>
+            <div id="crowdResult" class="askToolResult"></div>
+        </div>`;
+
+    document.querySelector("#closeCrowdTool")?.addEventListener("click", () => {
+        askToolWorkspace.style.display = "none";
+        askToolWorkspace.innerHTML = "";
+    });
+
+    document.querySelector("#runCrowdPrediction")?.addEventListener("click", runCrowdPrediction);
+    askToolWorkspace.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+
+// ============================================================
+// RUN CROWD PREDICTION
+// ============================================================
+
+async function runCrowdPrediction() {
+    const destinationSelect = document.querySelector("#crowdDestination");
+    const dateInput = document.querySelector("#crowdDate");
+    const resultBox = document.querySelector("#crowdResult");
+
+    if (!destinationSelect || !dateInput || !resultBox) return;
+
+    const destinations = loadAskTrip();
+    const destination = destinations[Number(destinationSelect.value)];
+
+    if (!destination) {
+        resultBox.innerHTML = `<div class="error">Please select a destination.</div>`;
+        return;
+    }
+
+    const spotName = String(destination.name || destination.spot_name || "").trim();
+    const district = String(destination.district || "").trim();
+    const travelDate = dateInput.value;
+
+    if (!spotName) {
+        resultBox.innerHTML = `<div class="error">Destination name is unavailable.</div>`;
+        return;
+    }
+    if (!district) {
+        resultBox.innerHTML = `<div class="error">District information is unavailable for this destination.</div>`;
+        return;
+    }
+    if (!travelDate) {
+        resultBox.innerHTML = `<div class="error">Please select a travel date.</div>`;
+        return;
+    }
+
+    const date = new Date(`${travelDate}T00:00:00`);
+    if (Number.isNaN(date.getTime())) {
+        resultBox.innerHTML = `<div class="error">Invalid travel date.</div>`;
+        return;
+    }
+
+    const year = date.getFullYear();
+    // CrowdInput expects month as a string, not a number.
+    const month = String(date.getMonth() + 1);
+    const season = getCrowdSeason(date.getMonth() + 1);
+
+    // These remain model inputs, but are derived internally instead of
+    // being exposed as unnecessary user controls.
+    const category = String(destination.category || "Other").trim();
+    const festival = "No";
+
+    resultBox.innerHTML = `<div class="loading active"><div class="spinner"></div></div>`;
+
+    try {
+        const prediction = await apiPost("/api/crowd/predict", {
+            spot_name: spotName,
+            district: district,
+            category: category,
+            year: year,
+            month: month,
+            season: season,
+            festival: festival
+        });
+
+        if (prediction && prediction.error) throw new Error(prediction.error);
+
+        renderCrowdResult(destination, prediction, {
+            travelDate: travelDate,
+            season: season
+        });
+    } catch (error) {
+        console.error("Crowd prediction failed:", error);
+        resultBox.innerHTML = `<div class="error">${esc(error.message || "Unable to generate crowd prediction.")}</div>`;
+    }
+}
+
+
+// ============================================================
+// DISPLAY CROWD RESULT
+// ============================================================
+
+function renderCrowdResult(destination, prediction, context) {
+    const resultBox = document.querySelector("#crowdResult");
+    if (!resultBox) return;
+
+    const name = destination.name || destination.spot_name || "Destination";
+    const district = destination.district || "";
+    const predictedVisitors = Number(prediction?.predicted_total_visitors);
+    const visitorText = Number.isFinite(predictedVisitors)
+        ? Math.round(predictedVisitors).toLocaleString("en-IN")
+        : "—";
+
+    resultBox.innerHTML = `
+        <div class="askInsightCard">
+            <div class="askInsightHeader">
+                <div>
+                    <span class="eyebrow">Crowd Prediction</span>
+                    <h3>${esc(name)}</h3>
+                    <p class="muted">
+                        ${esc(district)}${context.travelDate ? ` · ${esc(context.travelDate)}` : ""}
+                    </p>
+                </div>
+            </div>
+
+            <div class="askInsightGrid">
+                <div class="askInsightMetric">
+                    <span>Predicted Visitors</span>
+                    <strong>${visitorText}</strong>
+                </div>
+                <div class="askInsightMetric">
+                    <span>Travel Season</span>
+                    <strong>${esc(context.season)}</strong>
+                </div>
+            </div>
+
+            <p class="muted">
+                Estimated visitor volume generated using the Around You crowd prediction model.
+            </p>
+            <small class="muted">
+                Crowd predictions are planning estimates and not live visitor counts.
+            </small>
+        </div>`;
+}
+
+
+// ============================================================
+// BUDGET ADVISOR
+// ============================================================
+
+function openBudgetAdvisor() {
+    const destinations = loadAskTrip();
+    if (!askToolWorkspace) return;
+
+    if (!destinations.length) {
+        askToolWorkspace.style.display = "block";
+        askToolWorkspace.innerHTML = `
+            <div class="askToolEmpty">
+                <span class="eyebrow">Budget Advisor</span>
+                <h3>Select a destination first</h3>
+                <p class="muted">Add a destination from Home, Explore or Planner before creating a money-saving budget plan.</p>
+                <a href="explore.html" class="btn secondary">Explore Destinations →</a>
+            </div>`;
+        askToolWorkspace.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+    }
+
+    const individualOptions = destinations.map((destination, index) => {
+        const name = destination.name || destination.spot_name || "Destination";
+        const district = destination.district || "";
+        return `<option value="${index}">${esc(name)}${district ? ` — ${esc(district)}` : ""}</option>`;
+    }).join("");
+
+    const allOption = destinations.length > 1
+        ? `<option value="all">All selected destinations</option>`
+        : "";
+
+    askToolWorkspace.style.display = "block";
+    askToolWorkspace.innerHTML = `
+        <div class="askToolPanel">
+            <div class="askToolHeader">
+                <div>
+                    <span class="eyebrow">Smart Spending</span>
+                    <h3>Budget Advisor</h3>
+                </div>
+                <button type="button" id="closeBudgetAdvisor" class="askToolClose" aria-label="Close">×</button>
+            </div>
+            <p class="muted">Choose a selected destination and enter the amount you want to spend. Around You will suggest a practical spending split and ways to preserve more of your budget.</p>
+            <div class="askToolFields">
+                <div class="field">
+                    <label for="budgetDestination">Destination</label>
+                    <select id="budgetDestination">${allOption}${individualOptions}</select>
+                </div>
+                <div class="field">
+                    <label for="availableBudget">Available Budget (₹)</label>
+                    <input type="number" id="availableBudget" min="1" step="100" placeholder="Example: 2000">
+                </div>
+            </div>
+            <button type="button" id="runBudgetAdvisor" class="btn primary">Find Best Budget Plan →</button>
+            <div id="budgetAdvisorResult" class="askToolResult"></div>
+        </div>`;
+
+    document.querySelector("#closeBudgetAdvisor")?.addEventListener("click", () => {
+        askToolWorkspace.style.display = "none";
+        askToolWorkspace.innerHTML = "";
+    });
+    document.querySelector("#runBudgetAdvisor")?.addEventListener("click", runBudgetAdvisor);
+    askToolWorkspace.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function getBudgetAdvisorDestinations(selectionValue) {
+    const destinations = loadAskTrip();
+    if (selectionValue === "all") return destinations;
+    const index = Number(selectionValue);
+    return Number.isInteger(index) && index >= 0 && index < destinations.length ? [destinations[index]] : [];
+}
+
+function getDestinationEntryFee(destination) {
+    const values = [destination?.entry_fee, destination?.entryFee, destination?.fee, destination?.ticket_price, destination?.ticketPrice];
+    for (const value of values) {
+        const numeric = Number(value);
+        if (Number.isFinite(numeric) && numeric >= 0) return numeric;
+    }
+    return 0;
+}
+
+function formatBudgetMoney(value) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? `₹${Math.round(numeric).toLocaleString("en-IN")}` : "₹0";
+}
+
+function allocateBudgetAdvisorPlan(availableBudget, selectedDestinations) {
+    const count = Math.max(selectedDestinations.length, 1);
+    const knownEntryFees = selectedDestinations.reduce((sum, d) => sum + getDestinationEntryFee(d), 0);
+    const entryAllocation = Math.min(availableBudget * 0.15, Math.max(knownEntryFees, availableBudget * 0.05));
+    const transportAllocation = availableBudget * (count > 1 ? 0.28 : 0.22);
+    const foodAllocation = availableBudget * 0.20;
+    const activitiesAllocation = availableBudget * (count > 1 ? 0.12 : 0.10);
+    const plannedSpend = Math.min(availableBudget * 0.80, entryAllocation + transportAllocation + foodAllocation + activitiesAllocation);
+    const reserve = Math.max(availableBudget - plannedSpend, 0);
+    return { entryAllocation, transportAllocation, foodAllocation, activitiesAllocation, plannedSpend, reserve, knownEntryFees };
+}
+
+function buildBudgetSavingTips(selectedDestinations, availableBudget, plan) {
+    const tips = [];
+    const count = selectedDestinations.length;
+    tips.push(count > 1
+        ? "Group nearby destinations into the same outing to reduce repeated local transport costs."
+        : "Use bus, metro or shared local transport where practical instead of booking a private cab for the full visit.");
+    tips.push(plan.knownEntryFees > 0
+        ? `Known entry fees account for about ${formatBudgetMoney(plan.knownEntryFees)}; avoid allocating much more than needed to tickets unless you add paid activities.`
+        : "The current trip data has no usable entry-fee value for this selection, so keep part of the activities allocation available for on-site charges.");
+    tips.push("Set the reserve aside before the trip instead of treating the entire available budget as spendable money.");
+    tips.push(availableBudget < 1000 * Math.max(count, 1)
+        ? "Your budget is relatively tight for the number of selected destinations, so prioritize low-cost food and public transport."
+        : "You have room to keep a meaningful reserve; avoid increasing spending simply because money remains available.");
+    return tips;
+}
+
+function runBudgetAdvisor() {
+    const destinationSelect = document.querySelector("#budgetDestination");
+    const budgetInput = document.querySelector("#availableBudget");
+    const resultBox = document.querySelector("#budgetAdvisorResult");
+    if (!destinationSelect || !budgetInput || !resultBox) return;
+
+    const availableBudget = Number(budgetInput.value);
+    if (!Number.isFinite(availableBudget) || availableBudget <= 0) {
+        resultBox.innerHTML = `<div class="error">Please enter a valid budget greater than ₹0.</div>`;
+        return;
+    }
+
+    try {
+        localStorage.setItem(
+            ASK_BUDGET_KEY,
+            String(availableBudget)
+        );
+    } catch (error) {
+        console.warn(
+            "Unable to save Budget Advisor amount:",
+            error
+        );
+    }
+
+    const selectedDestinations = getBudgetAdvisorDestinations(destinationSelect.value);
+    if (!selectedDestinations.length) {
+        resultBox.innerHTML = `<div class="error">Please select at least one destination.</div>`;
+        return;
+    }
+
+    const plan = allocateBudgetAdvisorPlan(availableBudget, selectedDestinations);
+    const tips = buildBudgetSavingTips(selectedDestinations, availableBudget, plan);
+    renderBudgetAdvisorResult(selectedDestinations, availableBudget, plan, tips);
+}
+
+function renderBudgetAdvisorResult(selectedDestinations, availableBudget, plan, tips) {
+    const resultBox = document.querySelector("#budgetAdvisorResult");
+    if (!resultBox) return;
+
+    const title = selectedDestinations.length === 1
+        ? (selectedDestinations[0].name || selectedDestinations[0].spot_name || "Selected destination")
+        : `${selectedDestinations.length} selected destinations`;
+    const district = selectedDestinations.length === 1 ? (selectedDestinations[0].district || "") : "";
+    const tipItems = tips.map(tip => `<li>${esc(tip)}</li>`).join("");
+    const reservePercent = availableBudget > 0 ? (plan.reserve / availableBudget * 100) : 0;
+
+    resultBox.innerHTML = `
+        <div class="askInsightCard">
+            <div class="askInsightHeader"><div>
+                <span class="eyebrow">Budget Advice</span>
+                <h3>${esc(title)}</h3>
+                ${district ? `<p class="muted">${esc(district)}</p>` : ""}
+            </div></div>
+            <div class="askInsightGrid">
+                <div class="askInsightMetric"><span>Available Budget</span><strong>${formatBudgetMoney(availableBudget)}</strong></div>
+                <div class="askInsightMetric"><span>Suggested Spend</span><strong>${formatBudgetMoney(plan.plannedSpend)}</strong></div>
+                <div class="askInsightMetric"><span>Suggested Reserve</span><strong>${formatBudgetMoney(plan.reserve)}</strong></div>
+            </div>
+            <h4>Suggested Spending Plan</h4>
+            <div class="askInsightGrid">
+                <div class="askInsightMetric"><span>Local Transport</span><strong>${formatBudgetMoney(plan.transportAllocation)}</strong></div>
+                <div class="askInsightMetric"><span>Food & Refreshments</span><strong>${formatBudgetMoney(plan.foodAllocation)}</strong></div>
+                <div class="askInsightMetric"><span>Entry / Tickets</span><strong>${formatBudgetMoney(plan.entryAllocation)}</strong></div>
+                <div class="askInsightMetric"><span>Optional Activities</span><strong>${formatBudgetMoney(plan.activitiesAllocation)}</strong></div>
+            </div>
+            <h4>Ways to Save More</h4>
+            <ul>${tipItems}</ul>
+            <p class="muted">This plan keeps approximately ${reservePercent.toFixed(0)}% of your budget unallocated as a safety reserve.</p>
+            <small class="muted">Budget Advisor is a lightweight spending guide. Full trip-cost prediction remains in Plan a Trip, where the trained Budget ML model uses complete trip inputs.</small>
+        </div>`;
+}
+
+// ============================================================
+// TRANSPORT ADVISOR
+// ============================================================
+
+function getLatestAskBudget() {
+    try {
+        const value = Number(
+            localStorage.getItem(
+                ASK_BUDGET_KEY
+            )
+        );
+
+        return Number.isFinite(value) && value > 0
+            ? value
+            : 0;
+
+    } catch (error) {
+        console.warn(
+            "Unable to load latest Budget Advisor amount:",
+            error
+        );
+
+        return 0;
+    }
+}
+
+
+function getDestinationCoordinate(destination, keys) {
+
+    for (const key of keys) {
+
+        const value =
+            Number(destination?.[key]);
+
+        if (Number.isFinite(value)) {
+            return value;
+        }
+    }
+
+    return null;
+}
+
+
+function getDestinationLatLon(destination) {
+
+    return {
+        lat: getDestinationCoordinate(
+            destination,
+            [
+                "lat",
+                "latitude",
+                "Latitude"
+            ]
+        ),
+        lon: getDestinationCoordinate(
+            destination,
+            [
+                "lon",
+                "lng",
+                "longitude",
+                "Longitude"
+            ]
+        )
+    };
+}
+
+
+function calculateHaversineDistanceKm(
+    firstDestination,
+    secondDestination
+) {
+
+    const first =
+        getDestinationLatLon(
+            firstDestination
+        );
+
+    const second =
+        getDestinationLatLon(
+            secondDestination
+        );
+
+    if (
+        first.lat === null ||
+        first.lon === null ||
+        second.lat === null ||
+        second.lon === null
+    ) {
+        return null;
+    }
+
+    const toRadians =
+        degrees =>
+            degrees *
+            Math.PI /
+            180;
+
+    const earthRadiusKm =
+        6371;
+
+    const lat1 =
+        toRadians(first.lat);
+
+    const lat2 =
+        toRadians(second.lat);
+
+    const deltaLat =
+        toRadians(
+            second.lat -
+            first.lat
+        );
+
+    const deltaLon =
+        toRadians(
+            second.lon -
+            first.lon
+        );
+
+    const a =
+        Math.sin(deltaLat / 2) ** 2 +
+        Math.cos(lat1) *
+        Math.cos(lat2) *
+        Math.sin(deltaLon / 2) ** 2;
+
+    const c =
+        2 *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(1 - a)
+        );
+
+    return earthRadiusKm * c;
+}
+
+
+function buildTransportRoute(destinations) {
+
+    const legs = [];
+    let totalDistanceKm = 0;
+    let hasMissingCoordinates = false;
+
+    for (
+        let index = 0;
+        index < destinations.length - 1;
+        index += 1
+    ) {
+
+        const from =
+            destinations[index];
+
+        const to =
+            destinations[index + 1];
+
+        const distanceKm =
+            calculateHaversineDistanceKm(
+                from,
+                to
+            );
+
+        if (distanceKm === null) {
+
+            hasMissingCoordinates =
+                true;
+
+            continue;
+        }
+
+        totalDistanceKm +=
+            distanceKm;
+
+        legs.push({
+            from:
+                from.name ||
+                from.spot_name ||
+                "Destination",
+            to:
+                to.name ||
+                to.spot_name ||
+                "Destination",
+            distanceKm
+        });
+    }
+
+    return {
+        legs,
+        totalDistanceKm,
+        hasMissingCoordinates
+    };
+}
+
+
+function getDestinationRoadAccess(destination) {
+
+    const possibleValues = [
+        destination?.road_access_rating,
+        destination?.roadAccessRating,
+        destination?.road_rating,
+        destination?.roadRating
+    ];
+
+    for (const value of possibleValues) {
+
+        const rating =
+            Number(value);
+
+        if (
+            Number.isFinite(rating) &&
+            rating > 0
+        ) {
+            return Math.min(
+                Math.max(rating, 1),
+                5
+            );
+        }
+    }
+
+    return null;
+}
+
+
+function getTransportRoadAccess(destinations) {
+
+    const ratings =
+        destinations
+            .map(
+                getDestinationRoadAccess
+            )
+            .filter(
+                rating =>
+                    Number.isFinite(rating)
+            );
+
+    if (!ratings.length) {
+        return null;
+    }
+
+    return ratings.reduce(
+        (sum, rating) =>
+            sum + rating,
+        0
+    ) / ratings.length;
+}
+
+
+function deriveTransportRecommendation(
+    budget,
+    distanceKm,
+    roadAccess,
+    destinationCount
+) {
+
+    const effectiveDistance =
+        destinationCount > 1
+            ? distanceKm
+            : 0;
+
+    // Ask Transport intentionally uses only the factors requested
+    // for this lightweight advisor: budget, route distance and road access.
+    if (
+        roadAccess !== null &&
+        roadAccess < 2.5
+    ) {
+
+        if (effectiveDistance <= 15) {
+            return "Auto";
+        }
+
+        return budget >= 2500
+            ? "Car"
+            : "Bus";
+    }
+
+    if (destinationCount === 1) {
+
+        if (budget < 800) {
+            return "Bus";
+        }
+
+        if (budget < 1800) {
+            return "Auto";
+        }
+
+        return "Car";
+    }
+
+    if (effectiveDistance <= 5) {
+
+        return budget < 1000
+            ? "Bus"
+            : "Auto";
+    }
+
+    if (effectiveDistance <= 20) {
+
+        if (budget < 1200) {
+            return "Bus";
+        }
+
+        if (budget < 3000) {
+            return "Auto";
+        }
+
+        return "Car";
+    }
+
+    return budget >= 3500
+        ? "Car"
+        : "Bus";
+}
+
+
+function openTransportAdvisor() {
+
+    const destinations =
+        loadAskTrip();
+
+    if (!askToolWorkspace) {
+        return;
+    }
+
+    if (!destinations.length) {
+
+        askToolWorkspace.style.display =
+            "block";
+
+        askToolWorkspace.innerHTML = `
+
+            <div class="askToolEmpty">
+
+                <span class="eyebrow">
+                    Transport Advisor
+                </span>
+
+                <h3>
+                    Select a destination first
+                </h3>
+
+                <p class="muted">
+                    Add destinations from Home, Explore or Planner
+                    before generating a transport recommendation.
+                </p>
+
+                <a
+                    href="explore.html"
+                    class="btn secondary">
+
+                    Explore Destinations →
+
+                </a>
+
+            </div>
+        `;
+
+        askToolWorkspace.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+        return;
+    }
+
+    const budget =
+        getLatestAskBudget();
+
+    if (!budget) {
+
+        askToolWorkspace.style.display =
+            "block";
+
+        askToolWorkspace.innerHTML = `
+
+            <div class="askToolEmpty">
+
+                <span class="eyebrow">
+                    Transport Advisor
+                </span>
+
+                <h3>
+                    Set your budget first
+                </h3>
+
+                <p class="muted">
+                    Transport uses the amount from Budget Advisor
+                    to recommend a suitable travel mode. Open Budget
+                    Advisor, enter your available budget, then return
+                    to Transport.
+                </p>
+
+                <button
+                    type="button"
+                    id="openBudgetFromTransport"
+                    class="btn primary">
+
+                    Open Budget Advisor →
+
+                </button>
+
+            </div>
+        `;
+
+        document
+            .querySelector(
+                "#openBudgetFromTransport"
+            )
+            ?.addEventListener(
+                "click",
+                openBudgetAdvisor
+            );
+
+        askToolWorkspace.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+        return;
+    }
+
+    const route =
+        buildTransportRoute(
+            destinations
+        );
+
+    const roadAccess =
+        getTransportRoadAccess(
+            destinations
+        );
+
+    const routeRows =
+        destinations.length > 1
+            ? route.legs
+                .map(
+                    leg => `
+                        <div class="askInsightMetric">
+                            <span>
+                                ${esc(leg.from)} → ${esc(leg.to)}
+                            </span>
+                            <strong>
+                                ${leg.distanceKm.toFixed(1)} km
+                            </strong>
+                        </div>
+                    `
+                )
+                .join("")
+            : "";
+
+    askToolWorkspace.style.display =
+        "block";
+
+    askToolWorkspace.innerHTML = `
+
+        <div class="askToolPanel">
+
+            <div class="askToolHeader">
+
+                <div>
+
+                    <span class="eyebrow">
+                        Budget-aware travel
+                    </span>
+
+                    <h3>
+                        Transport Advisor
+                    </h3>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="closeTransportAdvisor"
+                    class="askToolClose"
+                    aria-label="Close">
+
+                    ×
+
+                </button>
+
+            </div>
+
+            <p class="muted">
+                Around You uses your latest Budget Advisor amount,
+                selected destinations, route distance and available
+                road-access information.
+            </p>
+
+            <div class="askInsightGrid">
+
+                <div class="askInsightMetric">
+                    <span>Available Budget</span>
+                    <strong>${formatBudgetMoney(budget)}</strong>
+                </div>
+
+                <div class="askInsightMetric">
+                    <span>Road Access Rating</span>
+                    <strong>
+                        ${
+                            roadAccess !== null
+                                ? `${roadAccess.toFixed(1)} / 5`
+                                : "Not available"
+                        }
+                    </strong>
+                </div>
+
+                ${
+                    destinations.length > 1
+                        ? `
+                            <div class="askInsightMetric">
+                                <span>Total Straight-line Route Distance</span>
+                                <strong>
+                                    ${
+                                        route.legs.length
+                                            ? `${route.totalDistanceKm.toFixed(1)} km`
+                                            : "Unavailable"
+                                    }
+                                </strong>
+                            </div>
+                        `
+                        : ""
+                }
+
+            </div>
+
+            ${
+                destinations.length > 1 &&
+                routeRows
+                    ? `
+                        <h4>
+                            Distance Between Selected Spots
+                        </h4>
+
+                        <div class="askInsightGrid">
+                            ${routeRows}
+                        </div>
+
+                        <small class="muted">
+                            Distances are calculated from destination
+                            coordinates and represent straight-line
+                            geographic distance, not driving distance.
+                        </small>
+                    `
+                    : ""
+            }
+
+            ${
+                route.hasMissingCoordinates
+                    ? `
+                        <p class="muted">
+                            Some route legs could not be calculated
+                            because coordinates were unavailable.
+                        </p>
+                    `
+                    : ""
+            }
+
+            <button
+                type="button"
+                id="runTransportAdvisor"
+                class="btn primary">
+
+                Recommend Transport →
+
+            </button>
+
+            <div
+                id="transportAdvisorResult"
+                class="askToolResult">
+            </div>
+
+        </div>
+    `;
+
+    document
+        .querySelector(
+            "#closeTransportAdvisor"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+                askToolWorkspace.style.display =
+                    "none";
+
+                askToolWorkspace.innerHTML =
+                    "";
+            }
+        );
+
+    document
+        .querySelector(
+            "#runTransportAdvisor"
+        )
+        ?.addEventListener(
+            "click",
+            () => runTransportAdvisor(
+                destinations,
+                budget,
+                route,
+                roadAccess
+            )
+        );
+
+    askToolWorkspace.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
+
+
+function runTransportAdvisor(
+    destinations,
+    budget,
+    route,
+    roadAccess
+) {
+
+    const resultBox =
+        document.querySelector(
+            "#transportAdvisorResult"
+        );
+
+    if (!resultBox) {
+        return;
+    }
+
+    if (
+        destinations.length > 1 &&
+        !route.legs.length
+    ) {
+
+        resultBox.innerHTML = `
+
+            <div class="error">
+                Route distance could not be calculated because
+                destination coordinates are unavailable.
+            </div>
+        `;
+
+        return;
+    }
+
+    const mode =
+        deriveTransportRecommendation(
+            budget,
+            route.totalDistanceKm,
+            roadAccess,
+            destinations.length
+        );
+
+    const destinationText =
+        destinations.length === 1
+            ? (
+                destinations[0].name ||
+                destinations[0].spot_name ||
+                "Selected destination"
+            )
+            : `${destinations.length} selected destinations`;
+
+    resultBox.innerHTML = `
+
+        <div class="askInsightCard">
+
+            <div class="askInsightHeader">
+
+                <div>
+
+                    <span class="eyebrow">
+                        Transport Recommendation
+                    </span>
+
+                    <h3>
+                        ${esc(destinationText)}
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <div class="askInsightGrid">
+
+                <div class="askInsightMetric">
+
+                    <span>
+                        Recommended Transport
+                    </span>
+
+                    <strong>
+                        ${esc(mode)}
+                    </strong>
+
+                </div>
+
+                <div class="askInsightMetric">
+
+                    <span>
+                        Budget Used for Advice
+                    </span>
+
+                    <strong>
+                        ${formatBudgetMoney(budget)}
+                    </strong>
+
+                </div>
+
+                <div class="askInsightMetric">
+
+                    <span>
+                        Road Access Rating
+                    </span>
+
+                    <strong>
+                        ${
+                            roadAccess !== null
+                                ? `${roadAccess.toFixed(1)} / 5`
+                                : "Not available"
+                        }
+                    </strong>
+
+                </div>
+
+                ${
+                    destinations.length > 1
+                        ? `
+                            <div class="askInsightMetric">
+
+                                <span>
+                                    Total Route Distance
+                                </span>
+
+                                <strong>
+                                    ${route.totalDistanceKm.toFixed(1)} km
+                                </strong>
+
+                            </div>
+                        `
+                        : ""
+                }
+
+            </div>
+
+            <p class="muted">
+                Recommendation is based on your latest Budget Advisor
+                amount, selected-route distance and available road-access
+                information.
+            </p>
+
+            <small class="muted">
+                For multiple destinations, displayed distances are
+                coordinate-based straight-line estimates rather than
+                road-navigation distances.
+            </small>
+
+        </div>
+    `;
+}
+
+
+// ============================================================
+// HELP ME DECIDE
+// ============================================================
+
+function openHelpMeDecide() {
+
+    const destinations =
+        loadAskTrip();
+
+    if (!askToolWorkspace) {
+        return;
+    }
+
+    if (destinations.length < 2) {
+
+        askToolWorkspace.style.display =
+            "block";
+
+        askToolWorkspace.innerHTML = `
+
+            <div class="askToolEmpty">
+
+                <span class="eyebrow">
+                    Help Me Decide
+                </span>
+
+                <h3>
+                    Select at least two destinations
+                </h3>
+
+                <p class="muted">
+                    This tool compares your selected places. Add at
+                    least two destinations from Home, Explore or Planner
+                    before asking Around You to compare them.
+                </p>
+
+                <a
+                    href="explore.html"
+                    class="btn secondary">
+
+                    Explore Destinations →
+
+                </a>
+
+            </div>
+        `;
+
+        askToolWorkspace.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+        return;
+    }
+
+    const budget =
+        getLatestAskBudget();
+
+    const destinationNames =
+        destinations
+            .map(destination =>
+                destination.name ||
+                destination.spot_name ||
+                "Destination"
+            )
+            .join(", ");
+
+    askToolWorkspace.style.display =
+        "block";
+
+    askToolWorkspace.innerHTML = `
+
+        <div class="askToolPanel">
+
+            <div class="askToolHeader">
+
+                <div>
+
+                    <span class="eyebrow">
+                        Smart Comparison
+                    </span>
+
+                    <h3>
+                        Help Me Decide
+                    </h3>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="closeDecideTool"
+                    class="askToolClose"
+                    aria-label="Close">
+
+                    ×
+
+                </button>
+
+            </div>
+
+            <p class="muted">
+                Compare ${destinations.length} selected destinations
+                using their entry fee, predicted weather, predicted
+                crowd and travel practicality.
+            </p>
+
+            <div class="askInsightCard">
+
+                <strong>
+                    Comparing
+                </strong>
+
+                <p class="muted">
+                    ${esc(destinationNames)}
+                </p>
+
+                ${
+                    budget
+                        ? `
+                            <p class="muted">
+                                Latest Budget Advisor amount:
+                                <strong>${formatBudgetMoney(budget)}</strong>
+                            </p>
+                        `
+                        : `
+                            <p class="muted">
+                                No Budget Advisor amount is saved yet.
+                                Cost comparison will use destination
+                                entry-fee information only.
+                            </p>
+                        `
+                }
+
+            </div>
+
+            <div class="askToolFields">
+
+                <div class="field">
+
+                    <label for="decideDate">
+                        Travel Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="decideDate"
+                        value="${getAskDefaultDate()}">
+
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                id="runHelpMeDecide"
+                class="btn primary">
+
+                Compare Destinations →
+
+            </button>
+
+            <div
+                id="decideResult"
+                class="askToolResult">
+            </div>
+
+        </div>
+    `;
+
+    document
+        .querySelector("#closeDecideTool")
+        ?.addEventListener(
+            "click",
+            () => {
+                askToolWorkspace.style.display =
+                    "none";
+
+                askToolWorkspace.innerHTML =
+                    "";
+            }
+        );
+
+    document
+        .querySelector("#runHelpMeDecide")
+        ?.addEventListener(
+            "click",
+            runHelpMeDecide
+        );
+
+    askToolWorkspace.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
+
+
+function getDecideCrowdLabel(visitors, allVisitors) {
+
+    if (!Number.isFinite(visitors)) {
+        return "Unavailable";
+    }
+
+    const valid =
+        allVisitors.filter(
+            value => Number.isFinite(value)
+        );
+
+    if (valid.length < 2) {
+        return "Predicted";
+    }
+
+    const min =
+        Math.min(...valid);
+
+    const max =
+        Math.max(...valid);
+
+    if (max === min) {
+        return "Similar";
+    }
+
+    const position =
+        (visitors - min) /
+        (max - min);
+
+    if (position <= 0.33) {
+        return "Lower";
+    }
+
+    if (position >= 0.67) {
+        return "Higher";
+    }
+
+    return "Moderate";
+}
+
+
+function scoreDecideDestination(
+    item,
+    context
+) {
+
+    let score = 50;
+    const reasons = [];
+
+    const rainfall =
+        Number(
+            item.climate?.Rainfall_Percent
+        );
+
+    if (Number.isFinite(rainfall)) {
+
+        if (rainfall <= 30) {
+            score += 12;
+            reasons.push(
+                "lower predicted rainfall"
+            );
+        } else if (rainfall >= 70) {
+            score -= 12;
+            reasons.push(
+                "higher predicted rainfall"
+            );
+        }
+    }
+
+    const visitors =
+        Number(
+            item.crowd?.predicted_total_visitors
+        );
+
+    const validVisitors =
+        context.visitors.filter(
+            value => Number.isFinite(value)
+        );
+
+    if (
+        Number.isFinite(visitors) &&
+        validVisitors.length >= 2
+    ) {
+
+        const min =
+            Math.min(...validVisitors);
+
+        const max =
+            Math.max(...validVisitors);
+
+        if (max > min) {
+
+            const crowdPosition =
+                (visitors - min) /
+                (max - min);
+
+            score +=
+                (1 - crowdPosition) * 18;
+
+            if (crowdPosition <= 0.33) {
+                reasons.push(
+                    "lower predicted crowd"
+                );
+            }
+        }
+    }
+
+    const entryFee =
+        getDestinationEntryFee(
+            item.destination
+        );
+
+    if (context.budget > 0) {
+
+        const budgetShare =
+            entryFee /
+            context.budget;
+
+        if (budgetShare <= 0.10) {
+            score += 10;
+            reasons.push(
+                "entry fee uses a small share of your budget"
+            );
+        } else if (budgetShare >= 0.30) {
+            score -= 8;
+        }
+    } else if (entryFee === 0) {
+
+        score += 5;
+        reasons.push(
+            "low known entry cost"
+        );
+    }
+
+    const roadAccess =
+        getDestinationRoadAccess(
+            item.destination
+        );
+
+    if (roadAccess !== null) {
+
+        if (roadAccess >= 4) {
+            score += 8;
+            reasons.push(
+                "strong road access"
+            );
+        } else if (roadAccess < 2.5) {
+            score -= 6;
+        }
+    }
+
+    return {
+        score,
+        reasons
+    };
+}
+
+
+async function runHelpMeDecide() {
+
+    const dateInput =
+        document.querySelector(
+            "#decideDate"
+        );
+
+    const resultBox =
+        document.querySelector(
+            "#decideResult"
+        );
+
+    if (!dateInput || !resultBox) {
+        return;
+    }
+
+    const destinations =
+        loadAskTrip();
+
+    if (destinations.length < 2) {
+
+        resultBox.innerHTML = `
+            <div class="error">
+                Please select at least two destinations.
+            </div>
+        `;
+
+        return;
+    }
+
+    const travelDate =
+        dateInput.value;
+
+    if (!travelDate) {
+
+        resultBox.innerHTML = `
+            <div class="error">
+                Please select a travel date.
+            </div>
+        `;
+
+        return;
+    }
+
+    const date =
+        new Date(
+            `${travelDate}T00:00:00`
+        );
+
+    if (Number.isNaN(date.getTime())) {
+
+        resultBox.innerHTML = `
+            <div class="error">
+                Invalid travel date.
+            </div>
+        `;
+
+        return;
+    }
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        );
+
+    const season =
+        getCrowdSeason(
+            date.getMonth() + 1
+        );
+
+    resultBox.innerHTML = `
+        <div class="loading active">
+            <div class="spinner"></div>
+        </div>
+    `;
+
+    try {
+
+        const comparisons =
+            await Promise.all(
+                destinations.map(
+                    async destination => {
+
+                        const name =
+                            String(
+                                destination.name ||
+                                destination.spot_name ||
+                                ""
+                            ).trim();
+
+                        const district =
+                            String(
+                                destination.district ||
+                                ""
+                            ).trim();
+
+                        const category =
+                            String(
+                                destination.category ||
+                                "Other"
+                            ).trim();
+
+                        let climate = null;
+                        let crowd = null;
+
+                        if (district) {
+
+                            try {
+                                climate =
+                                    await apiPost(
+                                        "/api/climate/predict",
+                                        {
+                                            district,
+                                            forecast_date:
+                                                travelDate
+                                        }
+                                    );
+                            } catch (error) {
+                                console.warn(
+                                    `Climate comparison unavailable for ${name}:`,
+                                    error
+                                );
+                            }
+                        }
+
+                        if (name && district) {
+
+                            try {
+                                crowd =
+                                    await apiPost(
+                                        "/api/crowd/predict",
+                                        {
+                                            spot_name:
+                                                name,
+                                            district:
+                                                district,
+                                            category:
+                                                category,
+                                            year:
+                                                year,
+                                            month:
+                                                month,
+                                            season:
+                                                season,
+                                            festival:
+                                                "No"
+                                        }
+                                    );
+                            } catch (error) {
+                                console.warn(
+                                    `Crowd comparison unavailable for ${name}:`,
+                                    error
+                                );
+                            }
+                        }
+
+                        return {
+                            destination,
+                            climate,
+                            crowd
+                        };
+                    }
+                )
+            );
+
+        renderHelpMeDecideResult(
+            comparisons,
+            travelDate
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Help Me Decide failed:",
+            error
+        );
+
+        resultBox.innerHTML = `
+            <div class="error">
+                ${esc(
+                    error.message ||
+                    "Unable to compare destinations."
+                )}
+            </div>
+        `;
+    }
+}
+
+
+function renderHelpMeDecideResult(
+    comparisons,
+    travelDate
+) {
+
+    const resultBox =
+        document.querySelector(
+            "#decideResult"
+        );
+
+    if (!resultBox) {
+        return;
+    }
+
+    const budget =
+        getLatestAskBudget();
+
+    const visitors =
+        comparisons.map(
+            item =>
+                Number(
+                    item.crowd
+                        ?.predicted_total_visitors
+                )
+        );
+
+    const scored =
+        comparisons.map(
+            item => {
+
+                const scoring =
+                    scoreDecideDestination(
+                        item,
+                        {
+                            budget,
+                            visitors
+                        }
+                    );
+
+                return {
+                    ...item,
+                    ...scoring
+                };
+            }
+        );
+
+    scored.sort(
+        (a, b) =>
+            b.score - a.score
+    );
+
+    const best =
+        scored[0];
+
+    const bestName =
+        best.destination.name ||
+        best.destination.spot_name ||
+        "Destination";
+
+    const bestReasons =
+        best.reasons.length
+            ? best.reasons
+                .slice(0, 3)
+                .join(", ")
+            : "the strongest overall balance across the available comparison data";
+
+    const cards =
+        scored
+            .map(
+                (item, index) => {
+
+                    const destination =
+                        item.destination;
+
+                    const name =
+                        destination.name ||
+                        destination.spot_name ||
+                        "Destination";
+
+                    const district =
+                        destination.district ||
+                        "";
+
+                    const category =
+                        destination.category ||
+                        "Other";
+
+                    const entryFee =
+                        getDestinationEntryFee(
+                            destination
+                        );
+
+                    const rainfall =
+                        Number(
+                            item.climate
+                                ?.Rainfall_Percent
+                        );
+
+                    const maxTemp =
+                        Number(
+                            item.climate
+                                ?.Temperature_Max_C
+                        );
+
+                    const predictedVisitors =
+                        Number(
+                            item.crowd
+                                ?.predicted_total_visitors
+                        );
+
+                    const crowdLabel =
+                        getDecideCrowdLabel(
+                            predictedVisitors,
+                            visitors
+                        );
+
+                    const roadAccess =
+                        getDestinationRoadAccess(
+                            destination
+                        );
+
+                    return `
+
+                        <div class="askInsightCard">
+
+                            <div class="askInsightHeader">
+
+                                <div>
+
+                                    <span class="eyebrow">
+                                        ${
+                                            index === 0
+                                                ? "Suggested Fit"
+                                                : `Comparison ${index + 1}`
+                                        }
+                                    </span>
+
+                                    <h3>
+                                        ${esc(name)}
+                                    </h3>
+
+                                    <p class="muted">
+                                        ${esc(district)}
+                                        ${category ? ` · ${esc(category)}` : ""}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                            <div class="askInsightGrid">
+
+                                <div class="askInsightMetric">
+                                    <span>Entry Fee</span>
+                                    <strong>
+                                        ${formatBudgetMoney(entryFee)}
+                                    </strong>
+                                </div>
+
+                                <div class="askInsightMetric">
+                                    <span>Predicted Crowd</span>
+                                    <strong>
+                                        ${
+                                            Number.isFinite(predictedVisitors)
+                                                ? `${Math.round(predictedVisitors).toLocaleString("en-IN")} · ${crowdLabel}`
+                                                : "Unavailable"
+                                        }
+                                    </strong>
+                                </div>
+
+                                <div class="askInsightMetric">
+                                    <span>Rainfall</span>
+                                    <strong>
+                                        ${
+                                            Number.isFinite(rainfall)
+                                                ? `${rainfall.toFixed(1)}%`
+                                                : "Unavailable"
+                                        }
+                                    </strong>
+                                </div>
+
+                                <div class="askInsightMetric">
+                                    <span>Max Temperature</span>
+                                    <strong>
+                                        ${
+                                            Number.isFinite(maxTemp)
+                                                ? `${maxTemp.toFixed(1)}°C`
+                                                : "Unavailable"
+                                        }
+                                    </strong>
+                                </div>
+
+                                <div class="askInsightMetric">
+                                    <span>Road Access</span>
+                                    <strong>
+                                        ${
+                                            roadAccess !== null
+                                                ? `${roadAccess.toFixed(1)} / 5`
+                                                : "Not available"
+                                        }
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    `;
+                }
+            )
+            .join("");
+
+    resultBox.innerHTML = `
+
+        <div class="askInsightCard">
+
+            <span class="eyebrow">
+                Around You Suggestion
+            </span>
+
+            <h3>
+                ${esc(bestName)} fits your current trip conditions best
+            </h3>
+
+            <p>
+                Based on the available comparison data for
+                ${esc(travelDate)}, this destination currently has
+                ${esc(bestReasons)}.
+            </p>
+
+            <p class="muted">
+                This is a planning suggestion, not a fixed rule.
+                You can still choose another destination based on
+                personal interests or activities.
+            </p>
+
+        </div>
+
+        <h4>
+            Destination Comparison
+        </h4>
+
+        ${cards}
+
+        <small class="muted">
+            Weather values come from the Around You Climate model and
+            crowd values come from the Crowd model. Cost comparison uses
+            destination entry-fee data and your latest Budget Advisor
+            amount when available.
+        </small>
+    `;
+}
+
+
+// ============================================================
+// QUICK ACTIONS
+// ============================================================
+
+if (askWeatherAction) {
+
+    askWeatherAction.addEventListener(
+        "click",
+        openWeatherTool
+    );
+}
+
+if (askCrowdAction) {
+
+    askCrowdAction.addEventListener(
+        "click",
+        openCrowdTool
+    );
+}
+
+if (askBudgetAction) {
+
+    askBudgetAction.addEventListener(
+        "click",
+        openBudgetAdvisor
+    );
+}
+
+if (askTransportAction) {
+
+    askTransportAction.addEventListener(
+        "click",
+        openTransportAdvisor
+    );
+}
+
+if (askDecideAction) {
+
+    askDecideAction.addEventListener(
+        "click",
+        openHelpMeDecide
+    );
+}
+
+document
+    .querySelectorAll(
+        ".askQuickAction"
+    )
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const prompt =
+    button.dataset.prompt || "";
+
+
+if (!prompt) {
+    return;
+}
+
+
+askQuestionInput.value =
+    prompt;
+
+askQuestionInput.focus();
+
+askQuestionInput.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+});
+
+            }
+        );
+
+    });
+
+
+
+// ============================================================
+// QUICK QUESTIONS
+// ============================================================
+
+document
+    .querySelectorAll(
+        ".askQuestion"
+    )
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const question =
+                    button.dataset.question || "";
+
+                askQuestionInput.value =
+                    question;
+
+                askQuestionInput.focus();
+
+                askQuestionInput.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+            }
+        );
+
+    });
+
+
+
+// ============================================================
+// LOAD CURRENT TRIP
+// ============================================================
+
+function loadAskTrip() {
+
+    try {
+
+        const stored =
+            localStorage.getItem(
+                ASK_SELECTED_KEY
+            );
+
+        const parsed =
+            JSON.parse(
+                stored || "[]"
+            );
+
+        return Array.isArray(parsed)
+            ? parsed
+            : [];
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load trip selections:",
+            error
+        );
+
+        return [];
+    }
+
+}
+
+
+
+// ============================================================
+// DISPLAY CURRENT TRIP
+// ============================================================
+
+function renderAskTrip() {
+
+    const destinations =
+        loadAskTrip();
+
+
+    if (!destinations.length) {
+
+        askTripCount.textContent =
+            "No destinations selected.";
+
+        askTripDestinations.innerHTML = `
+
+            <p class="muted">
+
+                Add destinations from Home or Explore
+                to see them here.
+
+            </p>
+        `;
+
+        askContinuePlanning.style.display =
+            "none";
+
+        return;
+    }
+
+
+    askTripCount.textContent =
+        `${destinations.length} ${
+            destinations.length === 1
+                ? "destination"
+                : "destinations"
+        } selected`;
+
+
+    askTripDestinations.innerHTML =
+        destinations
+            .map(destination => {
+
+                const name =
+                    destination.name ||
+                    destination.spot_name ||
+                    "Destination";
+
+                const district =
+                    destination.district ||
+                    "";
+
+                return `
+
+                    <div class="askTripItem">
+
+                        <strong>
+                            ${esc(name)}
+                        </strong>
+
+                        ${
+                            district
+                                ? `
+                                    <span class="muted">
+                                        ${esc(district)}
+                                    </span>
+                                `
+                                : ""
+                        }
+
+                    </div>
+                `;
+
+            })
+            .join("");
+
+
+    askContinuePlanning.style.display =
+        "";
+
+}
+
+
+
+renderAskTrip();
+
+</script>
+
+
+</body>
+
+</html>

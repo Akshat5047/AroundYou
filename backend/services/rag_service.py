@@ -304,7 +304,152 @@ def create_query_embedding(
 
 
 # ============================================================
-# RETRIEVAL
+# RESULT CONVERSION
+# ============================================================
+
+def _metadata_row_to_result(
+    row,
+    similarity,
+):
+
+    return {
+        "document_id":
+            str(
+                row[
+                    "document_id"
+                ]
+            ),
+
+        "spot_name":
+            str(
+                row[
+                    "spot_name"
+                ]
+            ),
+
+        "district":
+            str(
+                row[
+                    "district"
+                ]
+            ),
+
+        "category":
+            str(
+                row[
+                    "category"
+                ]
+            ),
+
+        "knowledge_type":
+            str(
+                row[
+                    "knowledge_type"
+                ]
+            ),
+
+        "content":
+            str(
+                row[
+                    "content"
+                ]
+            ),
+
+        "similarity":
+            float(
+                similarity
+            ),
+    }
+
+# ============================================================
+# EXACT DESTINATION RETRIEVAL
+# ============================================================
+
+def retrieve_selected_destinations(
+    selected_destinations
+):
+
+    (
+        _,
+        metadata,
+        _,
+        _,
+    ) = _get_rag_resources()
+
+    results = []
+
+    for selected in (
+        selected_destinations or []
+    ):
+
+        selected_id = str(
+            selected.get("id") or ""
+        ).strip()
+
+        selected_name = str(
+            selected.get("name") or ""
+        ).strip().lower()
+
+        selected_district = str(
+            selected.get("district") or ""
+        ).strip().lower()
+
+        match = None
+
+        # Prefer exact document ID.
+        if selected_id:
+
+            id_matches = metadata[
+                metadata["document_id"]
+                .astype(str)
+                .str.strip()
+                == selected_id
+            ]
+
+            if not id_matches.empty:
+                match = id_matches.iloc[0]
+
+        # Fall back to exact name + district.
+        if (
+            match is None
+            and selected_name
+        ):
+
+            name_matches = metadata[
+                metadata["spot_name"]
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                == selected_name
+            ]
+
+            if selected_district:
+
+                name_matches = name_matches[
+                    name_matches["district"]
+                    .astype(str)
+                    .str.strip()
+                    .str.lower()
+                    == selected_district
+                ]
+
+            if not name_matches.empty:
+                match = name_matches.iloc[0]
+
+        if match is None:
+            continue
+
+        results.append(
+            _metadata_row_to_result(
+                row=match,
+                similarity=1.0
+            )
+        )
+
+    return results
+
+# ============================================================
+# STANDARD FAISS RETRIEVAL
 # ============================================================
 
 def retrieve_documents(
@@ -326,7 +471,10 @@ def retrieve_documents(
     )
 
     search_count = min(
-        top_k,
+        max(
+            1,
+            int(top_k)
+        ),
         index.ntotal,
     )
 
@@ -352,55 +500,148 @@ def retrieve_documents(
         ]
 
         results.append(
-            {
-                "document_id":
-                    str(
-                        row[
-                            "document_id"
-                        ]
-                    ),
-
-                "spot_name":
-                    str(
-                        row[
-                            "spot_name"
-                        ]
-                    ),
-
-                "district":
-                    str(
-                        row[
-                            "district"
-                        ]
-                    ),
-
-                "category":
-                    str(
-                        row[
-                            "category"
-                        ]
-                    ),
-
-                "knowledge_type":
-                    str(
-                        row[
-                            "knowledge_type"
-                        ]
-                    ),
-
-                "content":
-                    str(
-                        row[
-                            "content"
-                        ]
-                    ),
-
-                "similarity":
-                    float(
-                        score
-                    ),
-            }
+            _metadata_row_to_result(
+                row=row,
+                similarity=score,
+            )
         )
+
+    return results
+
+
+# ============================================================
+# METADATA-FILTERED FAISS RETRIEVAL
+# ============================================================
+
+def retrieve_documents_by_districts(
+    question: str,
+    districts,
+    top_k: int = 10,
+):
+
+    """
+    Retrieve destinations only from the supplied districts.
+
+    The full FAISS index remains the source of semantic similarity,
+    but the search is expanded across the complete index before
+    applying the district restriction.
+
+    This prevents relevant destinations from being lost simply
+    because they did not appear inside a small global top-k result.
+    """
+
+    (
+        index,
+        metadata,
+        _,
+        _,
+    ) = _get_rag_resources()
+
+    # --------------------------------------------------------
+    # NORMALIZE DISTRICTS
+    # --------------------------------------------------------
+
+    allowed_districts = {
+        str(district)
+        .strip()
+        .lower()
+
+        for district in (
+            districts or []
+        )
+
+        if str(
+            district
+        ).strip()
+    }
+
+    # No district restriction supplied.
+    # Fall back to normal semantic retrieval.
+
+    if not allowed_districts:
+
+        return retrieve_documents(
+            question=question,
+            top_k=top_k,
+        )
+
+    # --------------------------------------------------------
+    # QUERY EMBEDDING
+    # --------------------------------------------------------
+
+    query_embedding = (
+        create_query_embedding(
+            question
+        )
+    )
+
+    # --------------------------------------------------------
+    # SEARCH COMPLETE INDEX
+    # --------------------------------------------------------
+    #
+    # There are currently only 271 destination vectors.
+    # Searching the full index is inexpensive and guarantees
+    # that allowed-district destinations are available for
+    # filtering.
+    # --------------------------------------------------------
+
+    search_count = (
+        index.ntotal
+    )
+
+    scores, indices = (
+        index.search(
+            query_embedding,
+            search_count,
+        )
+    )
+
+    results = []
+
+    for score, idx in zip(
+        scores[0],
+        indices[0],
+    ):
+
+        if idx == -1:
+            continue
+
+        row = metadata.iloc[
+            idx
+        ]
+
+        row_district = (
+            str(
+                row[
+                    "district"
+                ]
+            )
+            .strip()
+            .lower()
+        )
+
+        if (
+            row_district
+            not in allowed_districts
+        ):
+
+            continue
+
+        results.append(
+            _metadata_row_to_result(
+                row=row,
+                similarity=score,
+            )
+        )
+
+        if len(
+            results
+        ) >= max(
+            1,
+            int(top_k)
+        ):
+
+            break
 
     return results
 
@@ -527,7 +768,7 @@ GROUNDED ANSWER:
                 "not be generated."
             )
 
-    except Exception as exc:
+    except Exception:
 
         # Retrieval remains useful even if Gemini
         # quota/network/authentication is unavailable.

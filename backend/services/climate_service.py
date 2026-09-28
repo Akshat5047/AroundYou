@@ -412,9 +412,17 @@ def predict_climate(data: dict):
             day_values,
         ):
 
-            row[str(column)] = float(
-                value
-            )
+            column_name = str(column)
+            value = float(value)
+
+            # Rainfall_Percent must remain between 0 and 100.
+            if column_name == "Rainfall_Percent":
+                value = max(
+                    0.0,
+                    min(100.0, value)
+                )
+
+            row[column_name] = value
 
         daily_forecast.append(
             row
@@ -429,13 +437,13 @@ def predict_climate(data: dict):
     )
 
     return {
+        "forecast_date":
+            final_day["forecast_date"],
+
         **{
             key: value
             for key, value
             in final_day.items()
             if key != "forecast_date"
         },
-
-        "daily_forecast":
-            daily_forecast,
     }

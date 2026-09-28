@@ -6,104 +6,318 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 
 
+# ============================================================
+# PATHS
+# ============================================================
+
 RAG_DIR = Path(__file__).resolve().parent.parent
 
-DATA_PATH = RAG_DIR / "data" / "destination_knowledge.csv"
-VECTOR_DIR = RAG_DIR / "vector_store"
+DATA_PATH = (
+    RAG_DIR
+    / "data"
+    / "destinations_knowledge.csv"
+)
 
-VECTOR_DIR.mkdir(parents=True, exist_ok=True)
+VECTOR_DIR = (
+    RAG_DIR
+    / "vector_store"
+)
 
-INDEX_PATH = VECTOR_DIR / "destination.index"
-METADATA_PATH = VECTOR_DIR / "metadata.csv"
+VECTOR_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+INDEX_PATH = (
+    VECTOR_DIR
+    / "destination.index"
+)
+
+METADATA_PATH = (
+    VECTOR_DIR
+    / "metadata.csv"
+)
 
 
-print("=" * 50)
+# ============================================================
+# HEADER
+# ============================================================
+
+print("=" * 60)
 print("AROUND YOU - RAG VECTOR STORE")
-print("=" * 50)
+print("=" * 60)
 
 
-# --------------------------------------------------
-# 1. Load knowledge base
-# --------------------------------------------------
+# ============================================================
+# 1. VALIDATE KNOWLEDGE BASE
+# ============================================================
 
-df = pd.read_csv(DATA_PATH)
+if not DATA_PATH.exists():
 
-print(f"\nDocuments loaded: {len(df)}")
+    raise FileNotFoundError(
+        f"Knowledge base not found:\n{DATA_PATH}\n\n"
+        "Run 01_prepare_knowledge_base.py first."
+    )
 
 
-# --------------------------------------------------
-# 2. Prepare text for embedding
-# --------------------------------------------------
+# ============================================================
+# 2. LOAD KNOWLEDGE BASE
+# ============================================================
+
+df = pd.read_csv(
+    DATA_PATH
+)
+
+print()
+print(
+    f"Knowledge base: {DATA_PATH}"
+)
+
+print(
+    f"Documents loaded: {len(df)}"
+)
+
+
+if df.empty:
+
+    raise RuntimeError(
+        "Knowledge base is empty."
+    )
+
+
+# ============================================================
+# 3. VALIDATE REQUIRED COLUMNS
+# ============================================================
+
+required_columns = [
+    "document_id",
+    "spot_name",
+    "district",
+    "category",
+    "knowledge_type",
+    "content",
+]
+
+missing_columns = [
+    column
+    for column in required_columns
+    if column not in df.columns
+]
+
+if missing_columns:
+
+    raise RuntimeError(
+        "Knowledge base is missing required columns: "
+        + ", ".join(missing_columns)
+    )
+
+
+# ============================================================
+# 4. PREPARE TEXT FOR EMBEDDING
+# ============================================================
+
+print()
+print(
+    "Preparing destination documents..."
+)
+
+
+def build_embedding_text(row):
+
+    spot_name = str(
+        row.get(
+            "spot_name",
+            "",
+        )
+        or ""
+    ).strip()
+
+    district = str(
+        row.get(
+            "district",
+            "",
+        )
+        or ""
+    ).strip()
+
+    category = str(
+        row.get(
+            "category",
+            "",
+        )
+        or ""
+    ).strip()
+
+    content = str(
+        row.get(
+            "content",
+            "",
+        )
+        or ""
+    ).strip()
+
+    return (
+        f"Destination: {spot_name}. "
+        f"District: {district}, Telangana. "
+        f"Category: {category}. "
+        f"{content}"
+    )
+
 
 documents = (
-    df["spot_name"].fillna("")
-    + ". "
-    + df["category"].fillna("")
-    + ". "
-    + df["content"].fillna("")
-).tolist()
+    df.apply(
+        build_embedding_text,
+        axis=1,
+    )
+    .tolist()
+)
 
 
-# --------------------------------------------------
-# 3. Load embedding model
-# --------------------------------------------------
+# ============================================================
+# 5. LOAD EMBEDDING MODEL
+# ============================================================
 
-print("\nLoading embedding model...")
+print()
+print(
+    "Loading embedding model..."
+)
 
 model = SentenceTransformer(
     "sentence-transformers/all-MiniLM-L6-v2"
 )
 
 
-# --------------------------------------------------
-# 4. Generate normalized embeddings
-# --------------------------------------------------
+# ============================================================
+# 6. GENERATE EMBEDDINGS
+# ============================================================
 
-print("Generating embeddings...")
+print(
+    "Generating embeddings..."
+)
 
 embeddings = model.encode(
     documents,
     convert_to_numpy=True,
     normalize_embeddings=True,
-    show_progress_bar=True
+    show_progress_bar=True,
 )
 
-embeddings = embeddings.astype("float32")
+embeddings = embeddings.astype(
+    np.float32
+)
 
-print(f"Embedding shape: {embeddings.shape}")
+print(
+    f"Embedding shape: {embeddings.shape}"
+)
 
 
-# --------------------------------------------------
-# 5. Create FAISS cosine-similarity index
-# --------------------------------------------------
+# ============================================================
+# 7. VALIDATE EMBEDDINGS
+# ============================================================
+
+if len(embeddings) != len(df):
+
+    raise RuntimeError(
+        "Embedding count does not match "
+        "knowledge-base document count."
+    )
+
+
+if embeddings.ndim != 2:
+
+    raise RuntimeError(
+        "Embeddings have an unexpected shape: "
+        f"{embeddings.shape}"
+    )
+
+
+# ============================================================
+# 8. CREATE FAISS INDEX
+# ============================================================
 
 dimension = embeddings.shape[1]
 
-index = faiss.IndexFlatIP(dimension)
+index = faiss.IndexFlatIP(
+    dimension
+)
 
-index.add(embeddings)
+index.add(
+    embeddings
+)
 
 
-# --------------------------------------------------
-# 6. Save vector index + metadata
-# --------------------------------------------------
+# ============================================================
+# 9. VALIDATE INDEX
+# ============================================================
+
+if index.ntotal != len(df):
+
+    raise RuntimeError(
+        "FAISS index count does not match "
+        "knowledge-base document count."
+    )
+
+
+# ============================================================
+# 10. SAVE INDEX
+# ============================================================
 
 faiss.write_index(
     index,
-    str(INDEX_PATH)
+    str(INDEX_PATH),
 )
+
+
+# ============================================================
+# 11. SAVE METADATA
+# ============================================================
 
 df.to_csv(
     METADATA_PATH,
-    index=False
+    index=False,
+    encoding="utf-8",
 )
 
 
-print("\n" + "=" * 50)
-print("VECTOR STORE CREATED")
-print("=" * 50)
+# ============================================================
+# 12. SUMMARY
+# ============================================================
 
-print(f"\nVectors stored: {index.ntotal}")
-print(f"Embedding dimension: {dimension}")
-print(f"FAISS index: {INDEX_PATH}")
-print(f"Metadata: {METADATA_PATH}")
+print()
+print("=" * 60)
+print("VECTOR STORE CREATED")
+print("=" * 60)
+
+print()
+print(
+    f"Vectors stored: {index.ntotal}"
+)
+
+print(
+    f"Embedding dimension: {dimension}"
+)
+
+print(
+    f"Districts represented: "
+    f"{df['district'].nunique()}"
+)
+
+print(
+    f"Categories represented: "
+    f"{df['category'].nunique()}"
+)
+
+print()
+print(
+    f"FAISS index:\n{INDEX_PATH}"
+)
+
+print()
+print(
+    f"Metadata:\n{METADATA_PATH}"
+)
+
+print()
+print("=" * 60)
+print("RAG VECTOR STORE BUILD COMPLETE")
+print("=" * 60)

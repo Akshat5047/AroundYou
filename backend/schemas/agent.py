@@ -10,6 +10,7 @@ class TripPlanRequest(BaseModel):
     )
 
     district: Optional[str] = None
+    selected_destinations: Optional[list[dict]] = None
     travel_date: Optional[str] = None
 
     budget_limit: Optional[float] = None

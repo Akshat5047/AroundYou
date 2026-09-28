@@ -1,1 +1,243 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Explore | Around You</title><link rel="stylesheet" href="css/style.css"></head><body><nav class="nav"><div class="container navin"><a class="brand" href="index.html">Around <span>You</span></a><div class="links"><a href="index.html">Home</a><a href="explore.html">Explore</a><a href="planner.html">Plan a Trip</a><a href="ask.html">Ask Around You</a><a href="reviews.html">Review Trust</a></div><a class="btn primary" href="planner.html">Plan My Trip</a></div></nav><main><section class="pageHero"><div class="container"><span class="eyebrow">Destination discovery</span><h1>Explore Telangana</h1><p class="muted">Browse destinations across the state.</p></div></section><section class="section"><div class="container"><div id="destinations" class="grid"></div></div></section></main><script src="js/destinations.js"></script><footer class="footer"><div class="container footerin"><div><b>Around You</b><p>Discover Telangana. Plan Smarter. Travel Better.</p></div><small>AI-powered travel guidance for Telangana.</small></div></footer><script src="js/api.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Explore Telangana | Around You</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVIGATION ================= -->
+
+    <nav class="nav">
+        <div class="container navin">
+
+            <a href="index.html" class="brand">
+                Around <span>You</span>
+            </a>
+
+            <div class="links">
+                <a href="index.html">Home</a>
+                <a href="explore.html" class="activeNav">Explore</a>
+                <a href="planner.html">Plan a Trip</a>
+                <a href="ask.html">Ask Around You</a>
+                <a href="reviews.html">Review Trust</a>
+                <a href="cleanliness.html">Cleanliness</a>
+            </div>
+
+            <a href="planner.html" class="btn primary">
+                Plan My Trip
+            </a>
+
+            <button class="menu" aria-label="Open menu">
+                ☰
+            </button>
+
+        </div>
+    </nav>
+
+
+    <!-- ================= HERO ================= -->
+
+    <header class="pageHero exploreHero">
+
+        <div class="container">
+
+            <div class="exploreHeroInner">
+
+                <div>
+                    <p class="eyebrow">
+                        Discover Telangana
+                    </p>
+
+                    <h1>
+                        Find your next<br>
+                        place to explore.
+                    </h1>
+
+                    <p class="exploreIntro">
+                        Browse destinations across Telangana,
+                        filter by district or category, and send
+                        any place directly to your AI trip planner.
+                    </p>
+                </div>
+
+                <div class="exploreHeroStat">
+
+                    <span id="heroDestinationCount">
+                        —
+                    </span>
+
+                    <p>
+                        destinations available
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= FILTERS ================= -->
+
+    <main>
+
+        <section class="exploreSection">
+
+            <div class="container">
+
+                <div class="exploreToolbar">
+
+                    <div class="exploreSearch">
+
+                        <span class="searchIcon">
+                            ⌕
+                        </span>
+
+                        <input
+                            type="search"
+                            id="destinationSearch"
+                            placeholder="Search destinations..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <div class="exploreSelect">
+
+                        <label for="districtFilter">
+                            District
+                        </label>
+
+                        <select id="districtFilter">
+                            <option value="">
+                                All Districts
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <div class="exploreSelect">
+
+                        <label for="categoryFilter">
+                            Category
+                        </label>
+
+                        <select id="categoryFilter">
+                            <option value="">
+                                All Categories
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= RESULTS HEADER ================= -->
+
+                <div class="exploreResultsHead">
+
+                    <div>
+
+                        <p class="eyebrow">
+                            Places to visit
+                        </p>
+
+                        <h2 id="resultsTitle">
+                            Explore Telangana
+                        </h2>
+
+                    </div>
+
+                    <p
+                        id="destinationCount"
+                        class="destinationCount"
+                    >
+                        Loading destinations...
+                    </p>
+
+                </div>
+
+
+                <!-- ================= STATUS ================= -->
+
+                <div
+                    id="exploreStatus"
+                    class="exploreStatus"
+                ></div>
+
+
+                <!-- ================= DESTINATION CARDS ================= -->
+
+                <div
+                    id="destinationGrid"
+                    class="destinationGrid"
+                ></div>
+
+
+                <!-- ================= LOAD MORE ================= -->
+
+                <div class="loadMoreWrap">
+
+                    <button
+                        id="loadMoreButton"
+                        class="btn secondary loadMoreButton"
+                        type="button"
+                        style="display:none;"
+                    >
+                        Load More Places
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="footer">
+
+        <div class="container footerin">
+
+            <div>
+                <a href="index.html" class="brand">
+                    Around <span>You</span>
+                </a>
+
+                <p>
+                    AI-powered travel discovery and trip advisory
+                    for Telangana.
+                </p>
+            </div>
+
+            <div>
+                <p>
+                    Explore. Understand. Plan.
+                </p>
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <script src="js/api.js"></script>
+    <script src="js/destinations.js"></script>
+
+</body>
+</html>

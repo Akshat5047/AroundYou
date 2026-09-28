@@ -9,6 +9,7 @@ from google import genai
 
 from agent.tools import (
     search_destination_knowledge,
+    search_selected_destinations,
     run_budget_prediction,
     run_climate_prediction,
     run_crowd_prediction,
@@ -168,27 +169,61 @@ def extract_interests(text):
     text_lower = text.lower()
 
     known_interests = {
+        # Religious / spiritual
         "temple": "Temples",
+        "temples": "Temples",
+        "pilgrimage": "Pilgrimage",
+        "religious": "Religious",
+
+        # Heritage / history
         "kakatiya": "Kakatiya heritage",
         "fort": "Forts",
+        "forts": "Forts",
         "museum": "Museums",
+        "museums": "Museums",
         "history": "History",
         "historical": "History",
+        "heritage": "History",
         "architecture": "Architecture",
+        "architectural": "Architecture",
         "sculpture": "Sculptures",
+        "sculptures": "Sculptures",
+
+        # Nature
+        "nature": "Nature",
+        "natural": "Nature",
         "lake": "Lakes",
+        "lakes": "Lakes",
         "waterfall": "Waterfalls",
-        "pilgrimage": "Pilgrimage"
+        "waterfalls": "Waterfalls",
+        "wildlife": "Wildlife",
+        "sanctuary": "Wildlife",
+        "forest": "Nature",
+        "forests": "Nature",
+        "park": "Parks",
+        "parks": "Parks",
+
+        # Leisure
+        "leisure": "Leisure",
+        "recreation": "Leisure",
+        "zoo": "Leisure",
     }
 
     interests = []
 
-    for keyword, label in (
-        known_interests.items()
-    ):
+    for keyword, label in known_interests.items():
+
+        pattern = (
+            r"\b"
+            + re.escape(keyword)
+            + r"\b"
+        )
 
         if (
-            keyword in text_lower
+            re.search(
+                pattern,
+                text_lower
+            )
             and label not in interests
         ):
 
@@ -351,6 +386,46 @@ def service_error_message(
 # DESTINATION RELEVANCE
 # ============================================================
 
+# Some tourism areas span modern administrative district
+# boundaries. Keep this mapping explicit so unrelated districts
+# are never introduced accidentally.
+TOURISM_REGION_DISTRICTS = {
+    "warangal": [
+        "Warangal",
+        "Hanumakonda"
+    ],
+    "hanumakonda": [
+        "Hanumakonda",
+        "Warangal"
+    ]
+}
+
+
+def get_allowed_destination_districts(
+    requested_district
+):
+
+    if not requested_district:
+        return []
+
+    requested_clean = str(
+        requested_district
+    ).strip()
+
+    associated = (
+        TOURISM_REGION_DISTRICTS.get(
+            requested_clean.lower()
+        )
+    )
+
+    if associated:
+        return associated
+
+    return [
+        requested_clean
+    ]
+
+
 def destination_interest_score(
     source,
     interests
@@ -380,17 +455,36 @@ def destination_interest_score(
     score = 0
 
     interest_keywords = {
+
         "Temples": [
             "temple",
+            "religious",
             "pilgrimage"
         ],
 
+        "Religious": [
+            "religious",
+            "temple",
+            "pilgrimage",
+            "spiritual"
+        ],
+
+        "Pilgrimage": [
+            "pilgrimage",
+            "temple",
+            "religious"
+        ],
+
         "Kakatiya heritage": [
-            "kakatiya"
+            "kakatiya",
+            "heritage",
+            "historical"
         ],
 
         "Forts": [
-            "fort"
+            "fort",
+            "heritage",
+            "historical"
         ],
 
         "Museums": [
@@ -411,20 +505,50 @@ def destination_interest_score(
 
         "Sculptures": [
             "sculpture",
-            "sculptural"
+            "sculptural",
+            "carving",
+            "carvings"
+        ],
+
+        "Nature": [
+            "nature",
+            "natural",
+            "lake",
+            "waterfall",
+            "wildlife",
+            "sanctuary",
+            "forest"
         ],
 
         "Lakes": [
-            "lake"
+            "lake",
+            "reservoir",
+            "nature"
         ],
 
         "Waterfalls": [
-            "waterfall"
+            "waterfall",
+            "falls",
+            "nature"
         ],
 
-        "Pilgrimage": [
-            "pilgrimage",
-            "temple"
+        "Wildlife": [
+            "wildlife",
+            "sanctuary",
+            "zoo"
+        ],
+
+        "Parks": [
+            "park",
+            "garden",
+            "recreation"
+        ],
+
+        "Leisure": [
+            "leisure",
+            "recreation",
+            "park",
+            "zoo"
         ]
     }
 
@@ -442,7 +566,61 @@ def destination_interest_score(
 
     return score
 
+def destination_matches_interest(
+    source,
+    interest
+):
 
+    return (
+        destination_interest_score(
+            source,
+            [interest]
+        )
+        > 0
+    )
+
+def destination_unique_key(source):
+
+    name = str(
+        source.get(
+            "spot_name",
+            ""
+        )
+    ).strip().lower()
+
+    district = str(
+        source.get(
+            "district",
+            ""
+        )
+    ).strip().lower()
+
+    # Normalize punctuation and separators
+    name = re.sub(
+        r"[^a-z0-9\s]",
+        " ",
+        name
+    )
+
+    # Remove location suffix that creates duplicate
+    # naming variants such as:
+    # "Mallikarjuna Swamy Temple - Inavolu"
+    # "Inavolu Mallikarjuna Swamy Temple"
+    words = name.split()
+
+    normalized_words = sorted(
+        set(words)
+    )
+
+    normalized_name = " ".join(
+        normalized_words
+    )
+
+    return (
+        normalized_name,
+        district
+    )
+    
 def filter_destination_results(
     destination_result,
     requirements
@@ -462,22 +640,34 @@ def filter_destination_results(
         []
     )
 
-    # --------------------------------------------------------
-    # FIRST PRIORITY:
-    # Explicitly requested district
-    # --------------------------------------------------------
+    duration_days = requirements.get(
+        "duration_days"
+    )
 
-    district_sources = []
-
-    if requested_district:
-
-        requested_lower = (
+    allowed_districts = (
+        get_allowed_destination_districts(
             requested_district
-            .strip()
-            .lower()
         )
+    )
 
-        district_sources = [
+    allowed_lower = {
+        str(district).strip().lower()
+        for district in allowed_districts
+    }
+
+    requested_lower = (
+        str(requested_district).strip().lower()
+        if requested_district
+        else None
+    )
+
+    # --------------------------------------------------------
+    # GEOGRAPHIC FILTER
+    # --------------------------------------------------------
+
+    if allowed_lower:
+
+        geographic_sources = [
             source
             for source in all_sources
             if str(
@@ -486,29 +676,45 @@ def filter_destination_results(
                     ""
                 )
             ).strip().lower()
-            == requested_lower
+            in allowed_lower
         ]
 
+    else:
+
+        geographic_sources = list(
+            all_sources
+        )
+
     # --------------------------------------------------------
-    # SECOND PRIORITY:
-    # Interest relevance
+    # RANK SOURCES
     # --------------------------------------------------------
 
     ranked_sources = []
 
-    source_pool = (
-        district_sources
-        if district_sources
-        else all_sources
-    )
-
-    for source in source_pool:
+    for source in geographic_sources:
 
         interest_score = (
             destination_interest_score(
                 source,
                 interests
             )
+        )
+
+        source_district = str(
+            source.get(
+                "district",
+                ""
+            )
+        ).strip().lower()
+
+        exact_district_score = (
+            1
+            if (
+                requested_lower
+                and source_district
+                == requested_lower
+            )
+            else 0
         )
 
         similarity = float(
@@ -521,46 +727,168 @@ def filter_destination_results(
         ranked_sources.append(
             (
                 interest_score,
+                exact_district_score,
                 similarity,
                 source
             )
         )
 
+    # Interest relevance is the strongest signal.
+    # Exact requested district is the second priority.
+    # Semantic similarity is the third priority.
+
     ranked_sources.sort(
         key=lambda item: (
             item[0],
-            item[1]
+            item[1],
+            item[2]
         ),
         reverse=True
     )
 
-    filtered = [
-        item[2]
-        for item in ranked_sources
-    ]
+    selected = []
+    selected_ids = set()
 
-    # If interests were supplied, prefer results
-    # that actually match at least one interest.
+    # --------------------------------------------------------
+    # GUARANTEE INTEREST COVERAGE
+    # --------------------------------------------------------
+    #
+    # Example:
+    #
+    # Temples + Nature
+    #
+    # We try to include at least one matching destination
+    # for each interest before filling the remaining slots.
+    # --------------------------------------------------------
 
     if interests:
 
-        matching = [
-            item[2]
+        for interest in interests:
+
+            for (
+                interest_score,
+                exact_score,
+                similarity,
+                source
+            ) in ranked_sources:
+
+                if not destination_matches_interest(
+                    source,
+                    interest
+                ):
+                    continue
+                
+                unique_key = destination_unique_key(
+                    source
+                )
+
+                if unique_key in selected_ids:
+                    continue
+
+                selected.append(
+                    source
+                )
+
+                selected_ids.add(
+                    unique_key
+                )
+
+                break
+
+    # --------------------------------------------------------
+    # FILL REMAINING DESTINATIONS
+    # --------------------------------------------------------
+
+    for (
+        interest_score,
+        exact_score,
+        similarity,
+        source
+    ) in ranked_sources:
+
+        if (
+            interests
+            and interest_score <= 0
+        ):
+            continue
+
+        unique_key = destination_unique_key(
+    source
+)
+
+        if unique_key in selected_ids:
+            continue
+
+        selected.append(
+            source
+        )
+
+        selected_ids.add(
+            unique_key
+        )
+
+    # --------------------------------------------------------
+    # FALLBACK
+    # --------------------------------------------------------
+    #
+    # If none of the geographically valid destinations match
+    # the requested interests, retain the geographically valid
+    # destinations rather than returning nothing.
+    # --------------------------------------------------------
+
+    if not selected:
+
+        selected = [
+            item[3]
             for item in ranked_sources
-            if item[0] > 0
         ]
 
-        if matching:
-            filtered = matching
+    # --------------------------------------------------------
+    # DURATION-AWARE RESULT LIMIT
+    # --------------------------------------------------------
 
-    # Return maximum 3 clean results.
+    try:
+
+        days = max(
+            1,
+            int(duration_days)
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        days = 2
+
+    if days == 1:
+
+        result_limit = 4
+
+    elif days == 2:
+
+        result_limit = 5
+
+    else:
+
+        result_limit = min(
+            10,
+            (days * 2) + 1
+        )
 
     return {
         "query": destination_result.get(
             "query",
             ""
         ),
-        "sources": filtered[:3]
+
+        "allowed_districts":
+            allowed_districts,
+
+        "sources":
+            selected[
+                :result_limit
+            ]
     }
 
 
@@ -594,7 +922,9 @@ def run_destination_search(
 
         parts.append(
             "Traveler interests: "
-            + ", ".join(interests)
+            + ", ".join(
+                interests
+            )
             + "."
         )
 
@@ -608,10 +938,40 @@ def run_destination_search(
         parts
     )
 
+    # --------------------------------------------------------
+    # DETERMINE APPROVED TOURISM REGION
+    # --------------------------------------------------------
+
+    allowed_districts = (
+        get_allowed_destination_districts(
+            destination
+        )
+    )
+
+    # --------------------------------------------------------
+    # DISTRICT-AWARE RAG SEARCH
+    # --------------------------------------------------------
+    #
+    # rag_service.py now searches the complete FAISS index
+    # before applying the allowed-district filter.
+    #
+    # This means Warangal can retrieve destinations from:
+    #
+    #   Warangal
+    #   Hanumakonda
+    #
+    # without allowing unrelated Telangana districts.
+    # --------------------------------------------------------
+
     raw_result = (
         search_destination_knowledge(
             query=query,
-            top_k=10
+            top_k=30,
+            districts=(
+                allowed_districts
+                if destination
+                else None
+            )
         )
     )
 
@@ -669,11 +1029,36 @@ def run_ml_tools(
         "destination_or_district"
     )
 
-    if not district and sources:
+    source_districts = []
 
-        district = sources[0].get(
-            "district"
-        )
+    for source in sources:
+
+        source_district = str(
+            source.get(
+                "district",
+                ""
+            )
+        ).strip()
+
+        if (
+            source_district
+            and source_district
+            not in source_districts
+        ):
+
+            source_districts.append(
+                source_district
+            )
+
+    # If the user did not explicitly choose a district,
+    # infer one only when every retrieved destination
+    # belongs to the same district.
+    if (
+        not district
+        and len(source_districts) == 1
+    ):
+
+        district = source_districts[0]
 
     season = get_season(
         travel_date
@@ -686,11 +1071,13 @@ def run_ml_tools(
     missing = []
 
     if not district:
+
         missing.append(
             "district"
         )
 
     if not travel_date:
+
         missing.append(
             "travel_date"
         )
@@ -745,12 +1132,23 @@ def run_ml_tools(
     # ========================================================
 
     budget_values = {
-        "duration_days": duration_days,
-        "num_travelers": num_travelers,
-        "route_distance_km": route_distance_km,
-        "accommodation_tier": accommodation_tier,
-        "transport_mode": planned_transport,
-        "season": season
+        "duration_days":
+            duration_days,
+
+        "num_travelers":
+            num_travelers,
+
+        "route_distance_km":
+            route_distance_km,
+
+        "accommodation_tier":
+            accommodation_tier,
+
+        "transport_mode":
+            planned_transport,
+
+        "season":
+            season
     }
 
     missing = [
@@ -788,7 +1186,8 @@ def run_ml_tools(
                         planned_transport
                     ),
 
-                    "prediction": prediction
+                    "prediction":
+                        prediction
                 }
 
             else:
@@ -814,11 +1213,20 @@ def run_ml_tools(
     # ========================================================
 
     transport_values = {
-        "distance_km": route_distance_km,
-        "budget_limit": budget_limit,
-        "num_people": num_travelers,
-        "rainfall_mm": rainfall_mm,
-        "road_access_rating": road_access_rating
+        "distance_km":
+            route_distance_km,
+
+        "budget_limit":
+            budget_limit,
+
+        "num_people":
+            num_travelers,
+
+        "rainfall_mm":
+            rainfall_mm,
+
+        "road_access_rating":
+            road_access_rating
     }
 
     missing = [
@@ -856,7 +1264,8 @@ def run_ml_tools(
                         planned_transport
                     ),
 
-                    "prediction": prediction
+                    "prediction":
+                        prediction
                 }
 
             else:
@@ -886,89 +1295,109 @@ def run_ml_tools(
         results["crowd"] = {
             "status": "not_run",
             "missing_fields": [
-                "destination"
-            ]
-        }
-
-    elif not travel_date:
-
-        results["crowd"] = {
-            "status": "not_run",
-            "missing_fields": [
-                "travel_date"
+                "retrieved_destination"
             ]
         }
 
     else:
 
-        try:
+        primary = sources[0]
 
-            source = sources[0]
+        if not travel_date:
 
-            date = datetime.strptime(
-                travel_date,
-                "%Y-%m-%d"
-            )
+            results["crowd"] = {
+                "status": "not_run",
+                "missing_fields": [
+                    "travel_date"
+                ]
+            }
 
-            prediction = (
-                run_crowd_prediction(
-                    spot_name=source[
-                        "spot_name"
-                    ],
-                    district=source[
-                        "district"
-                    ],
-                    category=source[
-                        "category"
-                    ],
-                    year=date.year,
-                    month=date.strftime(
-                        "%B"
-                    ),
-                    season=season,
-                    festival=(
-                        festival
-                        if festival
-                        else "None"
+        else:
+
+            try:
+
+                date = datetime.strptime(
+                    travel_date,
+                    "%Y-%m-%d"
+                )
+
+                prediction = (
+                    run_crowd_prediction(
+                        spot_name=primary.get(
+                            "spot_name"
+                        ),
+
+                        district=primary.get(
+                            "district"
+                        ),
+
+                        category=primary.get(
+                            "category"
+                        ),
+
+                        year=date.year,
+
+                        month=date.strftime(
+                            "%B"
+                        ),
+
+                        season=season,
+
+                        festival=(
+                            festival
+                            or "None"
+                        )
                     )
                 )
-            )
 
-            if service_succeeded(
-                prediction
-            ):
+                if service_succeeded(
+                    prediction
+                ):
 
-                results["crowd"] = {
-                    "status": "success",
-                    "destination": source[
-                        "spot_name"
-                    ],
-                    "prediction": prediction
-                }
+                    results["crowd"] = {
+                        "status": "success",
 
-            else:
+                        "destination":
+                            primary.get(
+                                "spot_name"
+                            ),
+
+                        "prediction":
+                            prediction
+                    }
+
+                else:
+
+                    results["crowd"] = {
+                        "status": "error",
+
+                        "destination":
+                            primary.get(
+                                "spot_name"
+                            ),
+
+                        "message": (
+                            service_error_message(
+                                prediction
+                            )
+                        )
+                    }
+
+            except Exception as error:
 
                 results["crowd"] = {
                     "status": "error",
-                    "destination": source[
-                        "spot_name"
-                    ],
-                    "message": (
-                        service_error_message(
-                            prediction
-                        )
-                    )
+
+                    "destination":
+                        primary.get(
+                            "spot_name"
+                        ),
+
+                    "message":
+                        str(error)
                 }
 
-        except Exception as error:
-
-            results["crowd"] = {
-                "status": "error",
-                "message": str(error)
-            }
-
     return results
-
 
 # ============================================================
 # BUDGET CONSTRAINT
@@ -1514,7 +1943,7 @@ def generate_ai_plan(
     prompt = f"""
 You are Around You's AI Trip Advisor.
 
-Create a concise and practical Telangana trip plan.
+Create a concise, practical and personalized Telangana trip plan.
 
 USER REQUEST:
 {user_request}
@@ -1533,48 +1962,121 @@ BUDGET CHECK:
 
 RULES:
 
-1. Use only supplied destination knowledge
-   for destination facts.
+1. Use only the supplied destination knowledge for destination facts.
 
-2. Do not invent destinations.
+2. Do not invent destinations, attractions, hotels, routes, opening hours,
+   facilities, prices, entry fees or bookings.
 
-3. Do not invent prices.
+3. Use the requested district and any explicitly supplied associated
+   tourism-region destinations as the trip's geographic scope. Destinations
+   from an associated district may be used when they appear in the supplied
+   destination knowledge. Do not introduce any district or destination that
+   is not present in the supplied knowledge.
 
-4. Only describe ML predictions whose
-   status is "success".
+4. Prefer destinations that match the traveler's stated interests.
 
-5. Never describe an ML result with status
-   "error" as a prediction.
+5. If duration is known, create a day-by-day itinerary for exactly that
+   number of days.
 
-6. Clearly identify model outputs as predictions.
+6. Use the available retrieved destinations across the itinerary. Avoid
+   repeating the same destination on multiple days unless there are too few
+   supplied destinations to create a sensible plan.
 
-7. The user's transport_mode is the mode used
-   for budget estimation.
+7. A day may contain more than one destination when practical. Do not assume
+   that one destination must occupy an entire day.
 
-8. The Transport ML output is an independent
-   recommendation. Do not confuse the two.
+8. Never invent extra destinations merely to fill unused days. If the
+   supplied knowledge is insufficient for the requested duration, say that
+   the available verified destination knowledge is limited and create a
+   lighter itinerary using only the supplied places.
 
-9. If the budget status is within_budget,
-   state the predicted cost and remaining amount.
+9. Only describe ML predictions whose status is "success".
 
-10. If the budget status is over_budget,
-    state the predicted cost and amount over budget.
+10. Never describe an ML result with status "error" or "not_run" as a
+    successful prediction.
 
-11. If budget status is not_checked,
-    say budget validation was unavailable.
+11. Clearly identify model outputs as predictions or estimates rather than
+    guaranteed real-world values.
 
-12. Do not invent hotel names, routes,
-    entry fees, opening hours or facilities.
+12. The user's transport_mode is the mode used for budget estimation.
+    The Transport ML output is an independent model recommendation. Do not
+    replace the user's selected mode with the model recommendation and do
+    not claim that the recommended mode is more comfortable, convenient,
+    faster or better unless that information is explicitly supplied.
 
-13. Do not claim any booking has been made.
+13. If the transport model recommends the same mode the user selected, you
+    may state that the model recommendation aligns with the selected mode.
+    If it differs, state the difference neutrally.
 
-14. If duration is known, organize the
-    destinations into a day-by-day itinerary.
+14. If budget status is within_budget, state the predicted total cost and
+    predicted remaining amount.
 
-15. Keep the answer readable and useful.
+15. If budget status is over_budget, state the predicted total cost and the
+    predicted amount over budget. You may suggest changing broad planning
+    inputs such as accommodation tier or trip duration, but do not invent
+    specific hotel prices or savings.
 
-16. Do not expose Python or internal
-    implementation details.
+16. If budget status is not_checked, say budget validation was unavailable.
+
+17. For crowd predictions, describe the value as predicted visitor volume
+    for the model's destination and period. Do not imply that this many
+    people will physically be present at the exact moment the traveler
+    arrives unless the supplied model output explicitly represents that.
+
+18. Weather/climate outputs are model predictions. Do not convert rainfall
+    probability or predicted rainfall into certainty that it will rain.
+
+19. Do not claim any booking or reservation has been made.
+
+20. The frontend displays budget, cost breakdown, transport, climate, crowd
+    and recommended destinations separately. Do not repeat those sections
+    in the generated plan. Focus the response on the personalized day-by-day
+    itinerary and brief planning notes that are useful to the traveler.
+
+21. Use this output structure:
+
+    ## Trip Itinerary
+
+    A single short introductory sentence.
+
+    #### Day 1: Short descriptive title
+    • **Destination:** destination name
+    • **Plan:** concise description of what to do and why it matches the
+    traveler's interests.
+    • **Entry Fee:** include only when explicitly present in the supplied
+    destination knowledge.
+
+    Continue the same structure for every requested day.
+
+    ### Planning Note
+    Include this section only when useful, such as when verified destination
+    knowledge is insufficient for the requested duration.
+
+22. MARKDOWN FORMAT RULES:
+    Use only:
+    ## for the main itinerary heading
+    ### for Planning Note
+    #### for each day heading
+    **text** for bold text
+    • followed by a space for bullet points
+
+    Do not use backslashes anywhere in the response.
+    Do not escape Markdown characters.
+    Do not use HTML or HTML entities.
+    Do not use blockquotes.
+    Do not use horizontal rules.
+    Do not use italic Markdown.
+    Do not use the tilde character for approximate values.
+    Do not place Markdown formatting around punctuation.
+    Use normal Unicode characters such as ₹ and ° directly.
+
+23. Do not include separate Budget, Cost Breakdown, Climate, Crowd,
+    Transport, Recommended Destinations, Trip Overview or Model Insights
+    sections. Those values are already displayed by the frontend.
+
+24. Do not expose raw JSON, Python, FAISS, internal tools or implementation
+    details. Keep the itinerary concise and suitable for direct display in
+    the Around You interface.
 """
 
     interaction = client.interactions.create(
@@ -1592,15 +2094,15 @@ RULES:
         interaction.output_text
         .strip()
     )
-
-
-# ============================================================
+    
+    # ============================================================
 # MAIN AGENT
 # ============================================================
 
 def plan_trip(
     user_request,
     district=None,
+    selected_destinations=None,
     travel_date=None,
     budget_limit=None,
     num_travelers=None,
@@ -1636,7 +2138,17 @@ def plan_trip(
     # 2. RAG RETRIEVAL
     # --------------------------------------------------------
 
-    destination_result = (
+    if selected_destinations:
+
+        destination_result = (
+        search_selected_destinations(
+            selected_destinations
+        )
+    )
+
+    else:
+
+        destination_result = (
         run_destination_search(
             requirements
         )
@@ -1694,6 +2206,7 @@ def plan_trip(
     # --------------------------------------------------------
 
     generation_mode = "gemini"
+
     generation_error = None
 
     try:
@@ -1744,22 +2257,22 @@ def plan_trip(
 
         "tool_results": {
 
-            "requirements": requirements,
+            "requirements":
+                requirements,
 
-            "destination_search": (
-                destination_result
-            ),
+            "destination_search":
+                destination_result,
 
-            "ml_predictions": (
-                ml_results
-            ),
+            "ml_predictions":
+                ml_results,
 
-            "budget_evaluation": (
-                budget_evaluation
-            ),
+            "budget_evaluation":
+                budget_evaluation,
 
             "generation": {
-                "mode": generation_mode,
+
+                "mode":
+                    generation_mode,
 
                 "gemini_error": (
                     generation_error

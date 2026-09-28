@@ -5,7 +5,9 @@ from services.crowd_service import predict_crowd
 from services.transport_service import predict_transport
 
 from services.rag_service import (
-    retrieve_documents
+    retrieve_documents,
+    retrieve_documents_by_districts,
+    retrieve_selected_destinations,
 )
 
 
@@ -15,17 +17,46 @@ from services.rag_service import (
 
 def search_destination_knowledge(
     query: str,
-    top_k: int = 10
+    top_k: int = 10,
+    districts=None,
 ):
 
-    results = retrieve_documents(
-        question=query,
-        top_k=top_k,
-    )
+    if districts:
+
+        results = (
+            retrieve_documents_by_districts(
+                question=query,
+                districts=districts,
+                top_k=top_k,
+            )
+        )
+
+    else:
+
+        results = retrieve_documents(
+            question=query,
+            top_k=top_k,
+        )
 
     return {
         "query":
             query,
+
+        "sources":
+            results,
+    }
+    
+def search_selected_destinations(
+    selected_destinations
+):
+
+    results = retrieve_selected_destinations(
+        selected_destinations
+    )
+
+    return {
+        "query":
+            "Explicitly selected destinations",
 
         "sources":
             results,
@@ -86,11 +117,13 @@ def run_budget_prediction(
         result,
         dict
     ):
+
         return result
 
     if result.get(
         "error"
     ):
+
         return result
 
     # --------------------------------------------------------

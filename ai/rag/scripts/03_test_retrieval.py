@@ -60,7 +60,7 @@ def search(query, top_k=3):
 
 
 # Test query
-query = "historic Kakatiya temple with sculptures"
+query = "Tourist destinations in Warangal"
 
 print(f"\nQuery: {query}")
 
