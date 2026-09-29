@@ -1,1 +1,31 @@
-let q=document.querySelector("#q"),qp=new URLSearchParams(location.search).get("q");if(qp)q.value=qp;document.querySelector("#ask").onsubmit=async e=>{e.preventDefault();let l=document.querySelector("#load"),o=document.querySelector("#out"),er=document.querySelector("#err");l.className="loading show";o.className="answer";er.className="error";try{let d=await apiPost("/api/rag/ask",{question:q.value.trim()});o.innerHTML=`<span class="tag">Grounded answer</span><h2>${esc(d.question)}</h2><p>${esc(d.answer)}</p><h3>Sources</h3><div class="sources">${(d.sources||[]).map(s=>`<div class="source"><b>${esc(s.spot_name)}</b> · ${esc(s.district)}<p>${esc(s.content)}</p><small>Relevance ${Math.round((s.similarity||0)*100)}%</small></div>`).join("")}</div>`;o.className="answer show"}catch(x){er.textContent=x.message;er.className="error show"}finally{l.className="loading"}};
+// All quick questions share the same safe answer presentation.
+const q = document.querySelector('#q');
+const qp = new URLSearchParams(location.search).get('q');
+if (qp) q.value = qp;
+document.querySelector('#ask').onsubmit = async event => {
+    event.preventDefault();
+    const question = q.value.trim();
+    if (!question) { q.focus(); return; }
+    const loading = document.querySelector('#load');
+    if (loading.classList.contains('show')) return;
+    const output = document.querySelector('#out');
+    const error = document.querySelector('#err');
+    const button = event.currentTarget.querySelector('button[type="submit"]');
+    const label = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Finding an answer…';
+    loading.className = 'loading show';
+    output.className = 'answer';
+    error.className = 'error';
+    try {
+        const data = await apiPost('/api/rag/ask', {question});
+        renderAnswer({...data, question: data.question || question}, output);
+    } catch (failure) {
+        error.textContent = failure.message || 'Unable to get an answer. Please try again.';
+        error.className = 'error show';
+    } finally {
+        loading.className = 'loading';
+        button.disabled = false;
+        button.textContent = label;
+    }
+};

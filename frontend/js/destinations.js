@@ -694,6 +694,7 @@ function createDestinationCard(destination) {
     card.innerHTML = `
 
         <div class="destinationTop">
+${destinationVisual(category)}
 
 <button
     type="button"
@@ -709,7 +710,7 @@ function createDestinationCard(destination) {
         selected ? "Remove from trip" : "Add to trip"
     }"
 >
-    ${selected ? "✓" : "+"}
+    ${selected ? "✓ Added" : "+ Add to trip"}
 </button>
 
             <span class="tag">

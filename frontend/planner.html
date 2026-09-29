@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 
     <meta charset="utf-8">
@@ -16,9 +16,12 @@
         rel="stylesheet"
         href="css/style.css">
 
+<link rel="stylesheet" href="css/polish.css">
+<script src="js/ui.js" defer></script>
 </head>
 
 <body>
+<a class="skipLink" href="#mainContent">Skip to content</a>
 
 
 <nav class="nav">
@@ -76,7 +79,7 @@
 </nav>
 
 
-<main>
+<main id="mainContent">
 
 
 <section class="pageHero">
@@ -93,8 +96,7 @@
 
         <p class="muted">
             Tell Around You about your trip and receive
-            an AI-generated itinerary supported by our
-            travel intelligence models.
+            a personalized itinerary with budget, weather and crowd insights.
         </p>
 
     </div>
@@ -115,7 +117,7 @@
             <div class="formGrid">
 
 
-                <!-- DESTINATION -->
+                <div class="formSectionTitle full"><span>01</span><h2>Your destinations</h2><p>Choose the places you want to explore.</p></div>
 
                 <div class="field full">
 
@@ -216,7 +218,7 @@
 
 </div>
 
-                <!-- DATE -->
+                <div class="formSectionTitle full"><span>02</span><h2>When &amp; who</h2><p>Set your dates and group size.</p></div>
 
                 <div class="field">
 
@@ -268,7 +270,7 @@
                 </div>
 
 
-                <!-- BUDGET -->
+                <div class="formSectionTitle full"><span>03</span><h2>Your travel style</h2><p>Set a budget and make the trip your own.</p></div>
 
                 <div class="field">
 
@@ -423,9 +425,7 @@
 
                 <p class="muted">
                     Complete your trip preferences and
-                    Around You will combine destination
-                    knowledge with the available ML
-                    predictions to build your itinerary.
+                    your itinerary and travel estimates will appear here. Start by choosing a destination, then tell us how you like to travel.
                 </p>
 
             </div>
@@ -467,9 +467,7 @@
 
         <div>
 
-            <b>
-                Around You
-            </b>
+            <a class="brand" href="index.html">Around <span>You</span></a>
 
             <p>
                 Discover Telangana. Plan Smarter.
@@ -488,6 +486,7 @@
 
 
 <script src="js/api.js"></script>
+<script src="js/planner-results.js"></script>
 <script src="js/planner.js"></script>
 
 </body>

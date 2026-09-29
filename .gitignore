@@ -23,6 +23,10 @@ Thumbs.db
 # CACHE / LOGS
 .cache/
 .pytest_cache/
+.ui-preview-deps/
+.ui-preview/
+.ui-preview-deps/
+.ui-preview/
 *.log
 
 # LARGE RAW DATA-SOURCING FILES

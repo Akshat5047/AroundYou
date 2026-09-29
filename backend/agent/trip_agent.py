@@ -6,6 +6,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from google import genai
+from agent.itinerary import fallback_itinerary, selected_sources, missing_stops, generation_failure
 
 from agent.tools import (
     search_destination_knowledge,
@@ -36,11 +37,12 @@ client = None
 if API_KEY:
 
     client = genai.Client(
-        api_key=API_KEY
+        api_key=API_KEY,
+        http_options={'timeout': 60000, 'retry_options': {'attempts': 1}}
     )
 
 
-MODEL_NAME = "gemini-3.6-flash"
+MODEL_NAME = os.getenv('GEMINI_MODEL', 'gemini-3.6-flash')
 
 
 # ============================================================
@@ -1516,388 +1518,8 @@ def get_number(
 # FALLBACK PLAN
 # ============================================================
 
-def generate_fallback_plan(
-    requirements,
-    destination_result,
-    ml_results,
-    budget_evaluation
-):
-
-    lines = []
-
-    lines.append(
-        "Around You Trip Plan"
-    )
-
-    lines.append("")
-
-    duration = requirements.get(
-        "duration_days"
-    )
-
-    travelers = requirements.get(
-        "num_travelers"
-    )
-
-    travel_date = requirements.get(
-        "travel_date"
-    )
-
-    planned_transport = requirements.get(
-        "transport_mode"
-    )
-
-    if duration:
-
-        lines.append(
-            f"Duration: {duration} day(s)"
-        )
-
-    if travelers:
-
-        lines.append(
-            f"Travelers: {travelers}"
-        )
-
-    if travel_date:
-
-        lines.append(
-            f"Start date: {travel_date}"
-        )
-
-    lines.append("")
-
-    # --------------------------------------------------------
-    # DESTINATIONS
-    # --------------------------------------------------------
-
-    sources = destination_result.get(
-        "sources",
-        []
-    )
-
-    if sources:
-
-        lines.append(
-            "Suggested destinations:"
-        )
-
-        destination_limit = (
-            duration
-            if duration
-            else len(sources)
-        )
-
-        destination_limit = min(
-            destination_limit,
-            len(sources)
-        )
-
-        for index, source in enumerate(
-            sources[:destination_limit],
-            start=1
-        ):
-
-            lines.append(
-                f"{index}. "
-                f"{source['spot_name']} "
-                f"({source['district']})"
-            )
-
-            lines.append(
-                f"   {source['content']}"
-            )
-
-    else:
-
-        lines.append(
-            "No matching destination information "
-            "was available in the current "
-            "Around You knowledge base."
-        )
-
-    lines.append("")
-
-    # --------------------------------------------------------
-    # BUDGET
-    # --------------------------------------------------------
-
-    lines.append(
-        "Budget:"
-    )
-
-    budget_status = (
-        budget_evaluation.get(
-            "status"
-        )
-    )
-
-    if (
-        budget_status
-        == "within_budget"
-    ):
-
-        predicted = (
-            budget_evaluation[
-                "predicted_cost"
-            ]
-        )
-
-        remaining = (
-            budget_evaluation[
-                "difference"
-            ]
-        )
-
-        lines.append(
-            f"Predicted trip cost: "
-            f"₹{predicted:.2f}"
-        )
-
-        lines.append(
-            f"Estimated remaining budget: "
-            f"₹{remaining:.2f}"
-        )
-
-    elif (
-        budget_status
-        == "over_budget"
-    ):
-
-        predicted = (
-            budget_evaluation[
-                "predicted_cost"
-            ]
-        )
-
-        over_amount = abs(
-            budget_evaluation[
-                "difference"
-            ]
-        )
-
-        lines.append(
-            f"Predicted trip cost: "
-            f"₹{predicted:.2f}"
-        )
-
-        lines.append(
-            f"The predicted cost exceeds "
-            f"your budget by "
-            f"₹{over_amount:.2f}."
-        )
-
-    else:
-
-        lines.append(
-            "Budget prediction could not "
-            "be completed with the "
-            "available inputs."
-        )
-
-    lines.append("")
-
-    # --------------------------------------------------------
-    # TRANSPORT
-    # --------------------------------------------------------
-
-    lines.append(
-        "Transport:"
-    )
-
-    if planned_transport:
-
-        lines.append(
-            f"Transport selected for budget "
-            f"planning: {planned_transport}"
-        )
-
-    transport = ml_results.get(
-        "transport",
-        {}
-    )
-
-    if (
-        transport.get("status")
-        == "success"
-    ):
-
-        prediction = transport.get(
-            "prediction",
-            {}
-        )
-
-        mode = (
-            prediction.get(
-                "recommended_transport_mode"
-            )
-            or prediction.get(
-                "transport_mode"
-            )
-            or prediction.get(
-                "prediction"
-            )
-        )
-
-        if mode:
-
-            lines.append(
-                f"Transport ML recommendation: "
-                f"{mode}"
-            )
-
-        else:
-
-            lines.append(
-                f"Transport model result: "
-                f"{prediction}"
-            )
-
-    elif (
-        transport.get("status")
-        == "error"
-    ):
-
-        lines.append(
-            "Transport recommendation "
-            "was unavailable."
-        )
-
-    else:
-
-        lines.append(
-            "Transport recommendation "
-            "was not run because some "
-            "required inputs were unavailable."
-        )
-
-    lines.append("")
-
-    # --------------------------------------------------------
-    # CLIMATE
-    # --------------------------------------------------------
-
-    lines.append(
-        "Climate:"
-    )
-
-    climate = ml_results.get(
-        "climate",
-        {}
-    )
-
-    if (
-        climate.get("status")
-        == "success"
-    ):
-
-        lines.append(
-            f"Climate model prediction: "
-            f"{climate.get('prediction')}"
-        )
-
-    elif (
-        climate.get("status")
-        == "error"
-    ):
-
-        lines.append(
-            "Climate prediction is unavailable "
-            "for the selected district/date."
-        )
-
-    else:
-
-        lines.append(
-            "Climate prediction was not run "
-            "because required inputs were "
-            "unavailable."
-        )
-
-    lines.append("")
-
-    # --------------------------------------------------------
-    # CROWD
-    # --------------------------------------------------------
-
-    lines.append(
-        "Crowd:"
-    )
-
-    crowd = ml_results.get(
-        "crowd",
-        {}
-    )
-
-    if (
-        crowd.get("status")
-        == "success"
-    ):
-
-        prediction = crowd.get(
-            "prediction",
-            {}
-        )
-
-        visitors = get_number(
-            prediction,
-            [
-                "predicted_total_visitors",
-                "predicted_visitors",
-                "visitor_count"
-            ]
-        )
-
-        if visitors is not None:
-
-            lines.append(
-                f"Predicted visitors for "
-                f"{crowd.get('destination')}: "
-                f"{visitors:.0f}"
-            )
-
-        else:
-
-            lines.append(
-                f"Crowd model result: "
-                f"{prediction}"
-            )
-
-    elif (
-        crowd.get("status")
-        == "error"
-    ):
-
-        lines.append(
-            "Crowd prediction is currently "
-            "unavailable for this destination."
-        )
-
-    else:
-
-        lines.append(
-            "Crowd prediction was not run "
-            "because required inputs were "
-            "unavailable."
-        )
-
-    lines.append("")
-
-    lines.append(
-        "No bookings have been made. "
-        "Model outputs are predictions and "
-        "should be treated as planning guidance."
-    )
-
-    return "\n".join(
-        lines
-    )
-
-
-# ============================================================
-# GEMINI FINAL PLAN
-# MAXIMUM ONE GEMINI CALL
-# ============================================================
+def generate_fallback_plan(requirements, destination_result, ml_results, budget_evaluation):
+    return fallback_itinerary(requirements, destination_result)
 
 def generate_ai_plan(
     user_request,
@@ -1937,7 +1559,8 @@ def generate_ai_plan(
 
             "content": source.get(
                 "content"
-            )
+            ),
+            "knowledge_missing": source.get("knowledge_missing", False)
         })
 
     prompt = f"""
@@ -2077,21 +1700,33 @@ RULES:
 24. Do not expose raw JSON, Python, FAISS, internal tools or implementation
     details. Keep the itinerary concise and suitable for direct display in
     the Around You interface.
+
+25. Include EVERY supplied
+    destination by its exact name. Multiple stops can share a day. Never limit
+    the number of destinations to the number of days. If knowledge_missing is
+    true, retain the stop and explain that verified details are unavailable.
 """
 
-    interaction = client.interactions.create(
+    response = client.models.generate_content(
         model=MODEL_NAME,
-        input=prompt
+        contents=prompt,
+        config={
+            'max_output_tokens': 8192,
+            'automatic_function_calling': {'disable': True},
+        },
     )
 
-    if not interaction.output_text:
+    if response.candidates and str(response.candidates[0].finish_reason).split('.')[-1] != 'STOP':
+        raise RuntimeError('The generated response was incomplete or truncated.')
+
+    if not response.text:
 
         raise RuntimeError(
             "Gemini returned an empty response."
         )
 
     return (
-        interaction.output_text
+        response.text
         .strip()
     )
     
@@ -2154,6 +1789,11 @@ def plan_trip(
         )
     )
 
+    if selected_destinations:
+        destination_result['sources'] = selected_sources(
+            selected_destinations, destination_result.get('sources', [])
+        )
+
     tools_used.append(
         "faiss_destination_retrieval"
     )
@@ -2208,6 +1848,7 @@ def plan_trip(
     generation_mode = "gemini"
 
     generation_error = None
+    generation_status = {'reason': None, 'message': None}
 
     try:
 
@@ -2219,6 +1860,9 @@ def plan_trip(
             budget_evaluation=budget_evaluation
         )
 
+        if selected_destinations and missing_stops(final_plan, destination_result['sources']):
+            raise ValueError('Generated itinerary omitted selected destinations.')
+
         tools_used.append(
             "gemini_final_planner"
         )
@@ -2227,9 +1871,8 @@ def plan_trip(
 
         generation_mode = "fallback"
 
-        generation_error = str(
-            error
-        )
+        generation_status = generation_failure(error)
+        generation_error = generation_status['message']
 
         final_plan = (
             generate_fallback_plan(
@@ -2270,6 +1913,8 @@ def plan_trip(
                 budget_evaluation,
 
             "generation": {
+                **generation_status,
+                "complete": generation_mode == "gemini",
 
                 "mode":
                     generation_mode,

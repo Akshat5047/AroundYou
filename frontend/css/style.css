@@ -11,6 +11,8 @@
     --shadow:0 12px 35px #192d2817;
 }
 
+/* Final UI layer lives in a separate stylesheet to keep the original theme clear. */
+
 *{
     box-sizing:border-box;
 }

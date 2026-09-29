@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 
     <meta charset="utf-8">
@@ -16,9 +16,12 @@
         rel="stylesheet"
         href="css/style.css">
 
+<link rel="stylesheet" href="css/polish.css">
+<script src="js/ui.js" defer></script>
 </head>
 
 <body>
+<a class="skipLink" href="#mainContent">Skip to content</a>
 
 
 <nav class="nav">
@@ -76,7 +79,7 @@
 </nav>
 
 
-<main>
+<main id="mainContent">
 
     <section class="pageHero">
 
@@ -88,7 +91,7 @@
 
             <h1>
                 Review Trust Checker
-            </h1>
+            </h1><p class="muted">Get a second perspective on a travel review before you decide.</p>
 
         </div>
 
@@ -106,7 +109,7 @@
                 id="reviewForm"
                 class="formCard">
 
-                <div class="field">
+                <div class="reviewIntro"><span class="eyebrow">Read between the lines</span><h2>How trustworthy does it sound?</h2><p class="muted">Paste a review to explore the model’s trust signal.</p></div><div class="field">
 
                     <label>
                         Travel review
@@ -128,6 +131,7 @@
                     Analyze Review
 
                 </button>
+                <button type="button" id="sampleReview" class="btn secondary sampleButton">Try a sample review</button>
 
 
                 <div
@@ -178,9 +182,7 @@
 
         <div>
 
-            <b>
-                Around You
-            </b>
+            <a class="brand" href="index.html">Around <span>You</span></a>
 
             <p>
                 Discover Telangana. Plan Smarter.

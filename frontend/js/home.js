@@ -631,6 +631,7 @@ function createHomeDestinationCard(destination) {
     card.innerHTML = `
 
         <div class="destinationTop">
+${destinationVisual(category)}
 
             <button
                 type="button"
@@ -651,7 +652,7 @@ function createHomeDestinationCard(destination) {
                         : "Add to trip"
                 }">
 
-                ${selected ? "✓" : "+"}
+                ${selected ? "✓ Added" : "+ Add to trip"}
 
             </button>
 
@@ -787,8 +788,8 @@ function updateDestinationSelectionButtons() {
 
             button.textContent =
                 selectedNow
-                    ? "✓"
-                    : "+";
+                    ? "✓ Added"
+                    : "+ Add to trip";
 
             button.setAttribute(
                 "aria-label",
