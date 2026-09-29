@@ -2,6 +2,7 @@ from pathlib import Path
 import sqlite3
 
 from fastapi import APIRouter, HTTPException, Query
+from services.destination_catalogue import normalize_destinations
 
 
 router = APIRouter(
@@ -104,6 +105,7 @@ def get_destinations(
             for row in rows
         ]
 
+        destinations, _ = normalize_destinations(destinations)
         return {
             "count": len(destinations),
             "district": district,

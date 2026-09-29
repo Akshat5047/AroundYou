@@ -1,0 +1,787 @@
+{
+  "matched": 76,
+  "total": 271,
+  "note": "Remaining entries need a verified, reusable photograph. Do not substitute unrelated images.",
+  "missing": [
+    {
+      "name": "Old Fortress on Gutta",
+      "district": "Nalgonda"
+    },
+    {
+      "name": "Tribal Museum",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Bhagwan Das Bagh",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Narayanpet Saree Weaving",
+      "district": "Narayanpet"
+    },
+    {
+      "name": "Heritage Jail Museum",
+      "district": "Sangareddy"
+    },
+    {
+      "name": "Hill Fort Palace",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Chilukur Balaji Temple",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Shyamgarh Fort",
+      "district": "Nirmal"
+    },
+    {
+      "name": "Sri Abhaya Anjaneya Temple",
+      "district": "Bhadradri Kothagudem"
+    },
+    {
+      "name": "Megalithic Burial Site",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Jainath Temple",
+      "district": "Adilabad"
+    },
+    {
+      "name": "Wadapally Sri Meenakshi Agastheeshwara Temple",
+      "district": "Nalgonda"
+    },
+    {
+      "name": "Kaulas Fort",
+      "district": "Kamareddy"
+    },
+    {
+      "name": "Musical Garden & Planeterium",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Mehboob Chowk Clock Tower",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Sarangapur Hanuman Temple",
+      "district": "Nizamabad"
+    },
+    {
+      "name": "Akkampally Reservoir",
+      "district": "Nalgonda"
+    },
+    {
+      "name": "Pillalamarri Mini Zoo",
+      "district": "Mahabubnagar"
+    },
+    {
+      "name": "Tadvai Forest",
+      "district": "Mulugu"
+    },
+    {
+      "name": "Ranganayaka Sagar Reservoir",
+      "district": "Siddipet"
+    },
+    {
+      "name": "Siddeswara Temple",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Pahadi Shareef Dargah",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Kuravi Veerabhadra Swamy Temple",
+      "district": "Mahabubabad"
+    },
+    {
+      "name": "Mellacheruvu Shambhu Lingeswara Temple",
+      "district": "Suryapet"
+    },
+    {
+      "name": "Bugga Rameshwaram Temple - Anantagiri Hills",
+      "district": "Vikarabad"
+    },
+    {
+      "name": "Birla Planetarium & Science Museum",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Spanish Mosque",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Wonderla Hyderabad",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Kalakriti Art Gallery",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Rachakonda Fort",
+      "district": "Yadadri Bhuvanagiri"
+    },
+    {
+      "name": "Thousand Pillar Temple",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Gandhari Killa",
+      "district": "Mancherial"
+    },
+    {
+      "name": "Peddamma Temple",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Indira Park",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Pembarthi Metal Crafts Village",
+      "district": "Jangaon"
+    },
+    {
+      "name": "Wanaparthy Palace",
+      "district": "Wanaparthy"
+    },
+    {
+      "name": "Paigah Tombs",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Sri Gnana Saraswathi Temple",
+      "district": "Nirmal"
+    },
+    {
+      "name": "Vyasa Maharshi Cave",
+      "district": "Nirmal"
+    },
+    {
+      "name": "Horticulture Museum",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Maheshwaram Pyramid Temple",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "NTR Gardens",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Air Force Academy Museum (AFA Museum)",
+      "district": "Medchal-Malkajgiri"
+    },
+    {
+      "name": "Anantha Padmanabha Swamy Temple",
+      "district": "Vikarabad"
+    },
+    {
+      "name": "Nelakondapalli Buddhist Stupa",
+      "district": "Khammam"
+    },
+    {
+      "name": "Eturnagaram Sanctuary",
+      "district": "Mulugu"
+    },
+    {
+      "name": "Medaram",
+      "district": "Mulugu"
+    },
+    {
+      "name": "Pandavula Guhalu",
+      "district": "Jayashankar Bhupalpally"
+    },
+    {
+      "name": "Domakonda Fort",
+      "district": "Kamareddy"
+    },
+    {
+      "name": "Phanigiri Buddhist Site",
+      "district": "Suryapet"
+    },
+    {
+      "name": "Sri Laxmi Narshima Swamy Temple - Jankampet",
+      "district": "Nizamabad"
+    },
+    {
+      "name": "Komuravelli Mallikarjuna Swamy Temple",
+      "district": "Siddipet"
+    },
+    {
+      "name": "Edupayala Vana Durga Bhavani Temple",
+      "district": "Medak"
+    },
+    {
+      "name": "State Art Gallery",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Dharmapuri Lakshmi Narasimha Swamy Temple",
+      "district": "Jagtial"
+    },
+    {
+      "name": "Bhattisgarh Fort",
+      "district": "Nirmal"
+    },
+    {
+      "name": "Gadwal Fort",
+      "district": "Jogulamba Gadwal"
+    },
+    {
+      "name": "Godavari Ghat",
+      "district": "Bhadradri Kothagudem"
+    },
+    {
+      "name": "Godavari River & Bathing Ghat",
+      "district": "Nirmal"
+    },
+    {
+      "name": "Pushkar Ghat",
+      "district": "Nirmal"
+    },
+    {
+      "name": "Bugga Rameshwara Temple",
+      "district": "Nizamabad"
+    },
+    {
+      "name": "Parvati Barrage",
+      "district": "Mancherial"
+    },
+    {
+      "name": "Devatala Gutta",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Inavolu Mallikarjuna Swamy Temple",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Wadapally Sri Lakshmi Narasimha Swamy Temple",
+      "district": "Nalgonda"
+    },
+    {
+      "name": "Pochera Waterfalls",
+      "district": "Adilabad"
+    },
+    {
+      "name": "Railway Museum",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Issaipet Dam",
+      "district": "Kamareddy"
+    },
+    {
+      "name": "Jodeghat Memorial",
+      "district": "Komaram Bheem Asifabad"
+    },
+    {
+      "name": "Devarakonda Fort",
+      "district": "Nalgonda"
+    },
+    {
+      "name": "Genome Valley Nature Area",
+      "district": "Medchal-Malkajgiri"
+    },
+    {
+      "name": "Environment Educational Centre",
+      "district": "Nagarkurnool"
+    },
+    {
+      "name": "Tank Bund",
+      "district": "Khammam"
+    },
+    {
+      "name": "Manyamkonda Temple",
+      "district": "Mahabubnagar"
+    },
+    {
+      "name": "Latif Saheb Dargah",
+      "district": "Nalgonda"
+    },
+    {
+      "name": "Rani Rudramadevi Statue",
+      "district": "Warangal"
+    },
+    {
+      "name": "Keesara Gutta",
+      "district": "Medchal-Malkajgiri"
+    },
+    {
+      "name": "Mir Alam Tank",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Annamayya Concert Bhavan",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Mrugavani National Park",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Himayat Sagar Lake",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Krishna Kanth Park",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Raati Darwaza",
+      "district": "Khammam"
+    },
+    {
+      "name": "Jalari Gutta",
+      "district": "Khammam"
+    },
+    {
+      "name": "Public Garden (Hanumakonda)",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Air Force Museum, Hakimpet",
+      "district": "Medchal-Malkajgiri"
+    },
+    {
+      "name": "Ghanpur Cheruvu (local lake)",
+      "district": "Mulugu"
+    },
+    {
+      "name": "Vemulawada Raja Rajeshwara Swamy Temple",
+      "district": "Rajanna Sircilla"
+    },
+    {
+      "name": "Chandra Sagar (local lake)",
+      "district": "Nagarkurnool"
+    },
+    {
+      "name": "Koilkonda Fort",
+      "district": "Mahabubnagar"
+    },
+    {
+      "name": "Kakatiya Zoological Park",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Farhabad Viewpoint",
+      "district": "Nagarkurnool"
+    },
+    {
+      "name": "Shilpa Kala Vedika",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Jagtial Fort",
+      "district": "Jagtial"
+    },
+    {
+      "name": "Khammam Fort",
+      "district": "Khammam"
+    },
+    {
+      "name": "Nagunur Fort and Temples",
+      "district": "Karimnagar"
+    },
+    {
+      "name": "Maula Ali Dargah",
+      "district": "Medchal-Malkajgiri"
+    },
+    {
+      "name": "Upper Manair Dam",
+      "district": "Rajanna Sircilla"
+    },
+    {
+      "name": "palle prakruthi vanam (local village park, not a major tourist attraction)",
+      "district": "Mahabubabad"
+    },
+    {
+      "name": "Munnanur Jungle Resort",
+      "district": "Nagarkurnool"
+    },
+    {
+      "name": "Ali Sagar Dam",
+      "district": "Nizamabad"
+    },
+    {
+      "name": "Alisagar Deer Park",
+      "district": "Nizamabad"
+    },
+    {
+      "name": "Ashok Sagar / Jankampet Lake",
+      "district": "Nizamabad"
+    },
+    {
+      "name": "Manjeera Crocodile Wildlife Sanctuary",
+      "district": "Sangareddy"
+    },
+    {
+      "name": "Kaddam Lake",
+      "district": "Nirmal"
+    },
+    {
+      "name": "Undrugonda Fort",
+      "district": "Suryapet"
+    },
+    {
+      "name": "Jalavihar Water Park",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Pillalamarri Temple",
+      "district": "Suryapet"
+    },
+    {
+      "name": "Fakhruddin Gutta",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Kusumanchi Temples",
+      "district": "Khammam"
+    },
+    {
+      "name": "Ocean Park",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Singur Dam",
+      "district": "Sangareddy"
+    },
+    {
+      "name": "Khairunnisa Tomb",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Errum Manzil Palace",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Yellamma Temple (Balkampet)",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Jankampet Lakshmi Narasimha Swamy Temple",
+      "district": "Nizamabad"
+    },
+    {
+      "name": "Mount Opera",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Chinna waddepalli lake (Local lake)",
+      "district": "Warangal"
+    },
+    {
+      "name": "Shyam Mandir Temple / Veeranna Gutta",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Kripalu Cave",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Relampadu Balancing Reservoir Dam",
+      "district": "Jogulamba Gadwal"
+    },
+    {
+      "name": "Doli Gutta",
+      "district": "Mulugu"
+    },
+    {
+      "name": "Chincholi Wildlife Sanctuary",
+      "district": "Vikarabad"
+    },
+    {
+      "name": "Penthouse Cave",
+      "district": "Sangareddy"
+    },
+    {
+      "name": "Fox Sagar Lake",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Alampur Jogulamba Temple",
+      "district": "Jogulamba Gadwal"
+    },
+    {
+      "name": "Dichpally Ramalayam (Khilla Ramalayam)",
+      "district": "Nizamabad"
+    },
+    {
+      "name": "St. Joseph's Cathedral",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Kawal WLS/Tiger Reserve",
+      "district": "Nirmal"
+    },
+    {
+      "name": "Mrigavani National Park",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Kondakodima Hill",
+      "district": "Khammam"
+    },
+    {
+      "name": "Kinnerasani Dam",
+      "district": "Bhadradri Kothagudem"
+    },
+    {
+      "name": "Bapu Ghat",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Saigeetha Ashramam",
+      "district": "Medchal-Malkajgiri"
+    },
+    {
+      "name": "Sri Someswara Temple - Kolanupaka",
+      "district": "Yadadri Bhuvanagiri"
+    },
+    {
+      "name": "Sri Veeranarayana Temple",
+      "district": "Yadadri Bhuvanagiri"
+    },
+    {
+      "name": "Mid Manair Dam",
+      "district": "Rajanna Sircilla"
+    },
+    {
+      "name": "Karimnagar Deer Park",
+      "district": "Karimnagar"
+    },
+    {
+      "name": "Kawal Tiger Reserve",
+      "district": "Mancherial"
+    },
+    {
+      "name": "Lakaram Lake",
+      "district": "Khammam"
+    },
+    {
+      "name": "Amudalu Gutta",
+      "district": "Khammam"
+    },
+    {
+      "name": "Kaleshwaram Temple",
+      "district": "Jayashankar Bhupalpally"
+    },
+    {
+      "name": "Konda Pochamma Sagar Reservoir",
+      "district": "Siddipet"
+    },
+    {
+      "name": "Moula Ali Dargah",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Nagarjuna Sagar-Srisailam Tiger Reserve",
+      "district": "Nagarkurnool"
+    },
+    {
+      "name": "Bhadra Kali Temple",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Bedam Gutta",
+      "district": "Mulugu"
+    },
+    {
+      "name": "Kothakonda Peak",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Pandavula Gutta",
+      "district": "Khammam"
+    },
+    {
+      "name": "Sri Rama Chandra Temple - Ammapalli",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Biodiversity Park",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Kadam Dam",
+      "district": "Nirmal"
+    },
+    {
+      "name": "Basilica of Our Lady of the Assumption",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Botanical Gardens",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Mallikarjuna Swamy Temple - Inavolu",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Kerameri Ghats",
+      "district": "Komaram Bheem Asifabad"
+    },
+    {
+      "name": "Lalitha Someswara Swamy Temple (Somasila)",
+      "district": "Nagarkurnool"
+    },
+    {
+      "name": "Anandavihara Buddhist Monastery",
+      "district": "Medchal-Malkajgiri"
+    },
+    {
+      "name": "Mallaram Forest",
+      "district": "Nizamabad"
+    },
+    {
+      "name": "Exhibition Grounds (Numaish)",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Pochampally Handloom Park",
+      "district": "Yadadri Bhuvanagiri"
+    },
+    {
+      "name": "Edulabad Lake",
+      "district": "Medchal-Malkajgiri"
+    },
+    {
+      "name": "Arya VYyasha  Satram",
+      "district": "Jangaon"
+    },
+    {
+      "name": "Kamaldham Mandir / Lotus Temple",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Archival Museum",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Molangur Fort",
+      "district": "Karimnagar"
+    },
+    {
+      "name": "Bheemuni Paadam Waterfalls",
+      "district": "Mahabubabad"
+    },
+    {
+      "name": "Kattaleru Check Dam",
+      "district": "Khammam"
+    },
+    {
+      "name": "Lanja Madugu Siwaram WLS",
+      "district": "Peddapalli"
+    },
+    {
+      "name": "Sammakka Barrage",
+      "district": "Mulugu"
+    },
+    {
+      "name": "Lord Shiva Temple",
+      "district": "Nirmal"
+    },
+    {
+      "name": "Pranahita WLS",
+      "district": "Mancherial"
+    },
+    {
+      "name": "Yerragattu Gutta",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Ujwala Park",
+      "district": "Karimnagar"
+    },
+    {
+      "name": "Nizami View Point",
+      "district": "Ranga Reddy"
+    },
+    {
+      "name": "Annaram Barrage",
+      "district": "Mancherial"
+    },
+    {
+      "name": "Hanuman statue",
+      "district": "Bhadradri Kothagudem"
+    },
+    {
+      "name": "Mallela Theertham Waterfalls",
+      "district": "Nagarkurnool"
+    },
+    {
+      "name": "Manjira Dam",
+      "district": "Sangareddy"
+    },
+    {
+      "name": "Pakhal WLS",
+      "district": "Mahabubabad"
+    },
+    {
+      "name": "Shiva Parvathi Statue",
+      "district": "Hanumakonda"
+    },
+    {
+      "name": "Jatprole (Jetaprolu)",
+      "district": "Nagarkurnool"
+    },
+    {
+      "name": "Khilla Ghanpur (Ghanpur Fort)",
+      "district": "Jangaon"
+    },
+    {
+      "name": "Guddemdoddi Balancing Reservoir Dam(not a major tourism spot)",
+      "district": "Jogulamba Gadwal"
+    },
+    {
+      "name": "Sabitham Waterfalls",
+      "district": "Peddapalli"
+    },
+    {
+      "name": "Yadagirigutta",
+      "district": "Yadadri Bhuvanagiri"
+    },
+    {
+      "name": "Annapurna Studios",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Kotepally Reservoir",
+      "district": "Vikarabad"
+    },
+    {
+      "name": "Priyadarshini Jurala Dam",
+      "district": "Jogulamba Gadwal"
+    },
+    {
+      "name": "Medigadda Barrage Complex",
+      "district": "Mancherial"
+    },
+    {
+      "name": "Sanjeevaiah Park",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Kotilingala",
+      "district": "Jagtial"
+    },
+    {
+      "name": "Ananthagiri Storage Reservoir",
+      "district": "Rajanna Sircilla"
+    },
+    {
+      "name": "Assembly",
+      "district": "Hyderabad"
+    },
+    {
+      "name": "Ramalingeshwara Temple",
+      "district": "Jagtial"
+    }
+  ]
+}

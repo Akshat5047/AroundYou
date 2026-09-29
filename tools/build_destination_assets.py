@@ -17,7 +17,8 @@ photos = [
     ('Birla Temple', 'Hyderabad', 'Birla Mandir Hyderabad.jpg'),
     ('Arts College (Osmania University)', 'Hyderabad', 'Osmania University Arts College 02.jpg'),
 ]
-catalogue = {}
+catalogue_path = out / 'destination-photos.json'
+catalogue = json.loads(catalogue_path.read_text(encoding='utf-8')) if catalogue_path.exists() else {}
 asset_dir = ROOT / 'frontend/assets/destinations'
 asset_dir.mkdir(parents=True, exist_ok=True)
 for index, (name, district, filename) in enumerate(photos, 1):

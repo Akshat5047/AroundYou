@@ -37,7 +37,7 @@ with sync_playwright() as p:
             if name in ['index','explore']:
                 page.locator('.destinationAddButton').first.wait_for()
                 page.locator('.destinationAddButton').first.click()
-                assert page.locator('.destinationAddButton').first.inner_text() in ['✓ Added','+ Add to trip']
+                assert page.locator('.destinationAddButton').first.inner_text() in ['−','+']
             if name == 'reviews':
                 page.locator('#sampleReview').click()
                 assert len(page.locator('#review').input_value()) > 30

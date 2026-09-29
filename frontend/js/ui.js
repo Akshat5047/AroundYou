@@ -52,11 +52,6 @@
     });
     document.querySelectorAll('.uploadIcon').forEach(element => element.innerHTML = uiIcon('image'));
     document.querySelectorAll('.searchIcon').forEach(element => element.innerHTML = uiIcon('search'));
-    document.querySelector('#sampleReview')?.addEventListener('click', () => {
-        const review = document.querySelector('#review');
-        review.value = 'We visited on a Saturday morning. The entrance was busy, but the walk inside was peaceful. Bring water and allow about two hours to explore.';
-        review.focus();
-    });
 
     // Make existing analysis detail blocks collapsible without changing result IDs.
     const detection = document.querySelector('#detectionList')?.closest('.resultCard');

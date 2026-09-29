@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/style.css?v=20260929-2">
 <link rel="stylesheet" href="css/polish.css?v=20260929-2">
 <script src="js/ui.js?v=20260929-2" defer></script>
-<script src="js/destination-details.js?v=20260929-2" defer></script>
+<script src="js/destination-details.js?v=20260929-8" defer></script>
 </head>
 
 <body>
@@ -109,6 +109,7 @@
                         <input
                             type="search"
                             id="destinationSearch"
+                            aria-label="Search destinations by name or district"
                             placeholder="Search destinations..."
                             autocomplete="off"
                         >
@@ -148,6 +149,13 @@
                 </div>
 
 
+                <div class="filterRefinements">
+                    <label class="filterCheck"><input type="checkbox" id="freeEntryFilter"> Free entry <span class="muted">(recorded)</span></label>
+                    <div class="exploreSelect"><label for="ratingFilter">Minimum recorded rating</label><select id="ratingFilter"><option value="">Any rating</option><option value="4">4.0 and above</option><option value="4.5">4.5 and above</option></select></div>
+                    <div class="exploreSelect"><label for="sortDestinations">Sort by</label><select id="sortDestinations"><option value="popular">Popularity</option><option value="rating">Highest recorded rating</option><option value="entry">Lowest recorded entry fee</option><option value="name">Name A–Z</option></select></div>
+                </div>
+                <div id="activeDestinationFilters" class="activeFilters" aria-label="Active destination filters"></div>
+                <p class="catalogueNote">Fees and ratings are recorded estimates, not live verified information. Confirm costs and access before your visit.</p>
                 <!-- ================= RESULTS HEADER ================= -->
 
                 <div class="exploreResultsHead">
@@ -167,6 +175,7 @@
                     <p
                         id="destinationCount"
                         class="destinationCount"
+                        role="status"
                     >
                         Loading destinations...
                     </p>
@@ -241,7 +250,7 @@
 
 
     <script src="js/api.js?v=20260929-2"></script>
-    <script src="js/destinations.js?v=20260929-2"></script>
+    <script src="js/destinations.js?v=20260929-7"></script>
 
 </body>
 </html>
