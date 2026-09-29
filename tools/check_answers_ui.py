@@ -29,9 +29,9 @@ with sync_playwright() as p:
     for width in [1440, 390]:
         page.set_viewport_size({'width': width, 'height': 1000})
         page.goto('http://127.0.0.1:5503/ask.html')
-        for i in range(page.locator('.askQuestion').count()):
+        for i in range(page.locator('.askQuestionList .askQuestion').count()):
             current[0] = i
-            page.locator('.askQuestion').nth(i).click()
+            page.locator('.askQuestionList .askQuestion').nth(i).click()
             question = page.locator('#q').input_value()
             page.locator('#ask button[type="submit"]').click()
             page.wait_for_function('(question) => document.querySelector(".answerHeader h2")?.textContent === question', arg=question)

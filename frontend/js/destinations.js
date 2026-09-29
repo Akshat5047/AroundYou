@@ -892,6 +892,7 @@ renderDestinations();
     }
 
 
+    decorateDestinationCard(card, destination);
     return card;
 }
 

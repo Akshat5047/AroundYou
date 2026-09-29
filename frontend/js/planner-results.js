@@ -59,6 +59,43 @@ function renderPlannerResults(data, output) {
         ${tools.storage?.request_saved && tools.storage?.result_saved ? `<p class="resultFootnote">${fallback ? 'Your destination guide has been saved.' : 'Your trip has been saved.'}</p>` : ''}
     `;
     output.className = 'result show';
+    enhanceTripResults(output);
+}
+
+function enhanceTripResults(output) {
+    const layout = document.querySelector('.plannerLayout');
+    let preferences = document.querySelector('#tripPreferences');
+    if (!preferences) {
+        preferences = document.createElement('details');
+        preferences.id = 'tripPreferences';
+        const summary = document.createElement('summary');
+        summary.textContent = 'Edit trip preferences';
+        preferences.append(summary);
+        const form = document.querySelector('#planner');
+        form.before(preferences); preferences.append(form);
+    }
+    preferences.open = false;
+    layout.classList.add('hasTrip');
+    output.querySelector('a[href="#planner"]').addEventListener('click', event => {
+        event.preventDefault(); preferences.open = true;
+        preferences.scrollIntoView({behavior: 'smooth', block: 'start'});
+        preferences.querySelector('input:not([type="hidden"]),select')?.focus({preventScroll: true});
+    });
+    const text = output.innerText;
+    const actions = document.createElement('div'); actions.className = 'tripExportActions';
+    actions.innerHTML = `<button type="button" class="btn secondary printTrip">${uiIcon('print')} Print / Save PDF</button><button type="button" class="btn secondary copyTrip">${uiIcon('copy')} Copy itinerary</button><span class="exportStatus" role="status"></span>`;
+    output.querySelector('.tripResultHeader').append(actions);
+    actions.querySelector('.printTrip').addEventListener('click', () => window.print());
+    actions.querySelector('.copyTrip').addEventListener('click', async () => {
+        const status = actions.querySelector('.exportStatus');
+        try { await navigator.clipboard.writeText(text); status.textContent = 'Itinerary copied.'; }
+        catch {
+            status.textContent = 'Select and copy the itinerary below.';
+            let field = actions.querySelector('textarea');
+            if (!field) { field = document.createElement('textarea'); field.readOnly = true; field.setAttribute('aria-label', 'Itinerary to copy'); actions.append(field); }
+            field.value = text; field.focus(); field.select();
+        }
+    });
 }
 
 // Build block-level markup after escaping text; never inject generated HTML.

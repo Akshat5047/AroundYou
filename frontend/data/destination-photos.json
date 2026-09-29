@@ -1,0 +1,26 @@
+{
+  "chowmahalla palace|hyderabad": {
+    "url": "assets/destinations/destination-1.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Chowmahalla_Palace_01.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "title": "Chowmahalla Palace 01.jpg"
+  },
+  "birla temple|hyderabad": {
+    "url": "assets/destinations/destination-2.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Birla_Mandir_Hyderabad.jpg",
+    "author": "Mayur Panchamia",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "title": "Birla Mandir Hyderabad.jpg"
+  },
+  "arts college (osmania university)|hyderabad": {
+    "url": "assets/destinations/destination-3.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Osmania_University_Arts_College_02.jpg",
+    "author": "C.Chandra Kanth Rao at Telugu Wikipedia",
+    "license": "Public domain",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+    "title": "Osmania University Arts College 02.jpg"
+  }
+}

@@ -47,6 +47,7 @@ with sync_playwright() as p:
         assert 'Suggested approach' in page.locator('.itineraryContent').inner_text()
         for name in NAMES:
             assert name in page.locator('.itineraryContent').inner_text()
+        page.locator('#tripPreferences > summary').click()
         assert page.evaluate('''() => {
             const form = document.querySelector('#planner').getBoundingClientRect();
             return [...document.querySelectorAll('#planner input:not([type="hidden"]), #planner select, #planner textarea')].every(el => {
@@ -54,6 +55,7 @@ with sync_playwright() as p:
                 return r.left >= form.left && r.right <= form.right;
             }) && document.documentElement.scrollWidth <= innerWidth;
         }'''), f'Form overflow at {width}'
+        page.locator('#tripPreferences > summary').click()
         page.evaluate('window.scrollTo({top: 0, behavior: "instant"})')
         page.screenshot(path=str(ROOT / '.ui-preview' / f'planner-results-{width}.png'), full_page=True)
         print(f'PASS {width}px: controls contained, request includes 3 stops, 2 day cards include all stops')

@@ -99,6 +99,8 @@ function saveSelectedDestinations(destinations) {
 
 
 function destinationSelectionKey(destination) {
+    const name = destination.name || destination.spot_name;
+    if (name) return `${String(name).trim()}|${String(destination.district || '').trim()}`.toLowerCase();
 
     const id =
         destination.id ||
@@ -495,8 +497,9 @@ async function loadPopularDestinations() {
             );
         });
 
-        const popularDestinations =
-            destinations.slice(0, 6);
+        const [, photos] = await destinationAssets;
+        const photographed = destinations.filter(item => photos[destinationAssetKey(item)]);
+        const popularDestinations = (photographed.length ? photographed : destinations).slice(0, 6);
 
         popularDestinationsContainer.innerHTML =
             "";
@@ -747,6 +750,7 @@ ${destinationVisual(category)}
         }
     );
 
+    decorateDestinationCard(card, destination);
     return card;
 }
 

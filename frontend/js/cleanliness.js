@@ -79,6 +79,7 @@ form.addEventListener(
     async function (event) {
 
         event.preventDefault();
+        if (loading.classList.contains('show')) return;
 
 
         const file = fileInput.files[0];
