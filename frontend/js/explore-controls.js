@@ -40,5 +40,10 @@ function renderActiveDestinationFilters() {
     try { history.replaceState(null,'', location.pathname + (params.size ? '?' + params.toString() : '') + location.hash); } catch {}
 }
 document.addEventListener('DOMContentLoaded', () => {
+    const filters = document.getElementById('exploreFilters');
+    const desktop = matchMedia('(min-width: 901px)');
+    const setLayout = () => { filters.open = desktop.matches; };
+    setLayout();
+    desktop.addEventListener('change',setLayout);
     ['freeEntryFilter','ratingFilter','sortDestinations'].forEach(id => document.getElementById(id).addEventListener('change',applyFilters));
 });

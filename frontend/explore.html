@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="css/style.css?v=20260929-2">
 <link rel="stylesheet" href="css/polish.css?v=20260929-2">
 <script src="js/trip-selection.js?v=20260930-1"></script>
-<script src="js/explore-controls.js?v=20260930-1" defer></script>
+<link rel="stylesheet" href="css/explore-layout.css?v=20260930-1">
+<script src="js/explore-controls.js?v=20260930-2" defer></script>
 <script src="js/ui.js?v=20260929-2" defer></script>
 <script src="js/destination-details.js?v=20260929-8" defer></script>
 </head>
@@ -98,8 +99,11 @@
 
         <section class="exploreSection">
 
-            <div class="container">
-
+            <div class="container exploreLayout">
+                <aside class="exploreSidebar" aria-label="Destination filters">
+                <details id="exploreFilters" open>
+                <summary><span>Filter destinations</span><span class="filterDisclosure" aria-hidden="true">⌄</span></summary>
+                <div class="exploreFilterBody">
                 <div class="exploreToolbar">
 
                     <div class="exploreSearch">
@@ -156,8 +160,11 @@
                     <div class="exploreSelect"><label for="ratingFilter">Minimum recorded rating</label><select id="ratingFilter"><option value="">Any rating</option><option value="4">4.0 and above</option><option value="4.5">4.5 and above</option></select></div>
                     <div class="exploreSelect"><label for="sortDestinations">Sort by</label><select id="sortDestinations"><option value="popular">Popularity</option><option value="rating">Highest recorded rating</option><option value="entry">Lowest recorded entry fee</option><option value="name">Name A–Z</option></select></div>
                 </div>
-                <div id="activeDestinationFilters" class="activeFilters" aria-label="Active destination filters"></div>
                 <p class="catalogueNote">Fees and ratings are recorded estimates, not live verified information. Confirm costs and access before your visit.</p>
+                </div>
+                </details>
+                </aside>
+                <div class="exploreMainResults">
                 <!-- ================= RESULTS HEADER ================= -->
 
                 <div class="exploreResultsHead">
@@ -185,6 +192,7 @@
                 </div>
 
 
+                <div id="activeDestinationFilters" class="activeFilters" aria-label="Active destination filters"></div>
                 <!-- ================= STATUS ================= -->
 
                 <div
@@ -218,6 +226,7 @@
 
             </div>
 
+            </div>
         </section>
 
     </main>
