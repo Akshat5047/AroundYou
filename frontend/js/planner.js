@@ -268,9 +268,10 @@ async function loadDistrictDestinations() {
     try {
 
         const response =
-            await apiGet(
-                "/api/destinations"
-            );
+            await DestinationCatalogue.load(API_BASE + '/api/destinations');
+
+        // A later district choice takes precedence over an older pending request.
+        if (district !== districtInput.value) return;
 
         const destinations =
             Array.isArray(response)
@@ -376,6 +377,7 @@ async function loadDistrictDestinations() {
             error
         );
 
+        if (district !== districtInput.value) return;
         districtDestinationInput.innerHTML = `
             <option value="">
                 Unable to load destinations

@@ -20,7 +20,7 @@ start = '// BEGIN GENERATED DESTINATION CATALOGUE'
 end = '// END GENERATED DESTINATION CATALOGUE'
 loader = (root / 'frontend/js/destination-catalogue.js').read_text(encoding='utf-8')
 bundle = start + '\nwindow.BundledDestinations = ' + json.dumps(data, ensure_ascii=True, separators=(',', ':')) + ';\n' + loader + '\n' + end + '\n'
-for name in ['home.js', 'destinations.js']:
+for name in ['home.js', 'destinations.js', 'planner-catalogue.js']:
     script = root / 'frontend/js' / name
     content = script.read_text(encoding='utf-8')
     if content.startswith(start):

@@ -18,6 +18,17 @@
 const API_BASE =
     "http://127.0.0.1:8000";
 
+async function apiFetch(url, options) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), url.includes('/agent/plan-trip') ? 120000 : 30000);
+    try {
+        return await fetch(url, {...options, signal: controller.signal});
+    } catch (error) {
+        if (error.name === 'AbortError') throw new Error('The service took too long to respond. Your inputs are kept. Please try again.');
+        throw new Error('Unable to connect to the trip service. Your inputs are kept. Please try again once the service is available.');
+    } finally { clearTimeout(timer); }
+}
+
 
 // ============================================================
 // POST REQUEST
@@ -28,7 +39,7 @@ async function apiPost(
     body
 ) {
 
-    const response = await fetch(
+    const response = await apiFetch(
         API_BASE + path,
         {
             method: "POST",
@@ -89,7 +100,7 @@ async function apiPost(
 async function apiGet(path) {
 
     const response =
-        await fetch(
+        await apiFetch(
             API_BASE + path,
             {
                 method: "GET",
