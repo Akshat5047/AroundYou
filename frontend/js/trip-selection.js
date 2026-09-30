@@ -29,6 +29,8 @@ window.TripSelection = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Enable the new panel only after its layout and cross-page wiring are installed.
+    if (!document.documentElement.hasAttribute('data-trip-panel')) return;
     if (!document.querySelector('#destinations, #destinationGrid')) return;
     const panel = document.createElement('aside');
     panel.className = 'myTripPanel';
